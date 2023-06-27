@@ -1,0 +1,12 @@
+version: '3.8'
+
+# Runs the hozana v2 backend (Symfony)
+#
+# Usage: `docker-compose up` then open http://hozana.local:1819/api/fr/communities
+
+services:
+  php-api:
+    build:
+      context : .
+    image: ghcr.io/hozana/php-api:latest
+    container_name: php-api

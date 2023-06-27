@@ -1,0 +1,30 @@
+version: '3.8'
+
+# Runs the hozana v2 backend (Symfony)
+#
+# Usage: `docker-compose up` then open http://hozana.local:1819/api/fr/communities
+
+services:
+  php-api:
+    environment:
+      - "HOZANA_E2E_DB_URL=mysql://hozana:hozana@db:3306/hozana_e2e"
+   # links:
+   #   - db
+   #   - elasticsearch
+   #   - redis
+#      - mailhog
+   # depends_on:
+   #   - db
+   #   - elasticsearch
+   #   - redis
+#      - mailhog
+    volumes:
+      - ./backend:/data/code:delegated
+  # ports:
+   #   - 1819:80
+   #   - 1820:443
+    env_file: ./backend/.env.dev
+  #  entrypoint: entrypoint.sh
+    network_mode: "bridge"
+  #  extra_hosts:
+  #    - "host.docker.internal:host-gateway"
