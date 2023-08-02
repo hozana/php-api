@@ -6,4 +6,9 @@ if [ "${1#-}" != "$1" ]; then
 	set -- php-fpm "$@"
 fi
 
+composer install
+mkdir -p /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
+yarn && yarn build
+chown -R www-data:www-data /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
+
 exec "$@"

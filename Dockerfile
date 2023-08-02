@@ -86,8 +86,8 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug && \
     pecl install apcu && docker-php-ext-enable apcu
 
 # Configure PHP
-#COPY ./tools/docker/backend/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
-#COPY ./tools/docker/backend/php.ini /usr/local/etc/php/
+COPY usr/local/etc/php-fpm.d/www.conf /usr/local/etc/php-fpm.d/www.conf 
+COPY usr/local/etc/php/conf.d/php.ini /usr/local/etc/php/conf.d/php.ini
 
 # Configure Apache for API, admin, CRM
 #COPY ./tools/docker/backend/hozana-dev.conf /etc/apache2/sites-available/hozana.conf
@@ -123,6 +123,7 @@ COPY ./backend /data/code
 
 
 COPY usr/local/sbin/install_composer.sh /usr/local/sbin/install_composer.sh 
+COPY usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint
 
 RUN /usr/local/sbin/install_composer.sh \
  && mkdir -p /.composer && chmod -R 777 /.composer \
