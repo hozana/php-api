@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -x
 set -e
 
 # first arg is `-f` or `--some-option`
@@ -8,7 +8,8 @@ fi
 
 composer install
 mkdir -p /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
-yarn && yarn build
+bin/console doctrine:database:create --if-not-exists
+#yarn && yarn build
 chown -R www-data:www-data /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
 
 exec "$@"

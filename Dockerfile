@@ -144,3 +144,6 @@ VOLUME ["/data/code"]
 
 RUN docker-php-source delete && \
     rm -r /tmp/* /var/cache/*
+
+CMD php-fpm
+ENTRYPOINT ["/usr/local/bin/docker-php-entrypoint"]
