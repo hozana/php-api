@@ -140,7 +140,7 @@ jobs:
     shell: /bin/bash --login
     parallelism: 1
     docker:
-      - image: hozanaci/backend:latest
+      - image: hozanaci/backend:${CIRCLE_SHA1}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
@@ -178,6 +178,8 @@ workflows:
       #          - develop
       #          - master
       - translation_consistency:
+          requires:
+            - build
           filters:
             branches:
               only:
