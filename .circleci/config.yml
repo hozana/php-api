@@ -416,6 +416,19 @@ jobs:
 workflows:
   build_and_test:
     jobs:
+      - phpunit:
+          requires: []
+          filters:
+            branches:
+              ignore:
+                - prod
+                - master
+      - phpunit_coverage:
+          filters:
+            branches:
+              only:
+                - prod
+                - master
       #- build
       #- test:
       #    requires:
