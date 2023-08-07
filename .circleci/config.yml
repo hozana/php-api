@@ -163,6 +163,7 @@ jobs:
         environment:
           ES_JAVA_OPTS: -Xms256m -Xmx256m
       - image: redis:5
+    steps: []
 
     # This is the generic phpunit job, there is a second one configured slightly differently (phpunit_coverage).
     # Pay attention to changes you make to common phpunit setup (phpunit_base) and in the two sections below.
@@ -395,8 +396,8 @@ jobs:
           command: cd backend && php -d memory_limit=2G ./vendor/bin/phpstan analyse -c phpstan.neon
       # rector
       - run:
-         name: Run rector
-         command: cd backend && php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
+          name: Run rector
+          command: cd backend && php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
 
   translation_consistency:
     working_directory: /data/code
