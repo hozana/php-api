@@ -68,32 +68,20 @@ jobs:
     
     steps:
       - setup_remote_docker
-      - checkout
-      - run:
-          name: Install binary dependencies
-          command: apk --update add git
-      - run:
-          name: Initialize git submodules
-          # echo $DEPLOY_KEY > ~/.ssh/id_rsa_backend
-
-          # echo "Host  github.com" > ~/.ssh/config
-          #  echo "    HostName github.com" >> ~/.ssh/config
-          #  echo "    IdentityFile ~/.ssh/id_rsa_backend" >> ~/.ssh/config
-          #  cp -p deploy.key ~/.ssh/id_rsa_backend
-          command: |
-            chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
-            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
-            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
-      
       - run:
           name: Install dependencies
           command: |
             apk --update add --no-cache docker docker-cli-compose git
-
+      - checkout
+      - run:
+          name: Initialize git submodules
+          command: |
+            chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
+            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
+            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
       - run:
           name: Login to DockerHub
           command: echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-           
       - run:
           name: Build application Docker image
           command: docker build --no-cache -t $DOCKER_IMAGE:${CIRCLE_SHA1} .
