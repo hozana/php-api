@@ -226,10 +226,10 @@ workflows:
       #        only: 
       #          - develop
       #          - master
-      - linter:
-          requires: []
-      #- static_analysis:
+      #- linter:
       #    requires: []
+      - static_analysis:
+          requires: []
       #- translation_consistency:
       #    #requires:
       #    #  - build
