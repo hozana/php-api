@@ -113,7 +113,7 @@ jobs:
 
   phpunit_base: &phpunit_base
     executor: docker
-    working_directory: ~/hozana/backend
+    working_directory: /root/project/backend
     parallelism: 1
     shell: /bin/bash --login
 
@@ -245,6 +245,9 @@ jobs:
     resource_class: large
     steps:
       - checkout
+      - run: pwd
+      - run: ls -la /root/project
+      - run: ls -la 
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
       # Restore the dependency cache
