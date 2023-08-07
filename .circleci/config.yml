@@ -84,6 +84,7 @@ jobs:
             chmod 600 ~/.ssh/id_rsa_backend
             cat ~/.ssh/id_rsa_backend
             du -sh ~/.ssh/id_rsa_backend
+            eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q ~/.ssh/id_rsa_backend 
             git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_backend" submodule sync
             git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_backend" submodule update --recursive --init --remote
       
