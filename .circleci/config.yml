@@ -155,11 +155,11 @@ jobs:
       - checkout
       - checkout-recursive
       - run: 
-        name: Install PHP-CS-Fixer v3.5.0
-        command: |
-          cd backend 
-          curl -o php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
-          chmod +x php-cs-fixer.phar
+          name: Install PHP-CS-Fixer v3.5.0
+          command: |
+            cd backend 
+            curl -o php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
+            chmod +x php-cs-fixer.phar
       # Linter
       - run: 
           name: Run linter
