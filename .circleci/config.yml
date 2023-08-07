@@ -105,6 +105,213 @@ jobs:
           name: Save image to dockerHub registry
           command: docker push $DOCKER_IMAGE:${CIRCLE_SHA1}
 
+  phpunit_base: &phpunit_base
+    executor: docker
+    working_directory: ~/hozana/backend
+    parallelism: 1
+    shell: /bin/bash --login
+
+    parameters:
+      sonar_server_url:
+        type: string
+        description: "URL of your SonarQube server. e.g.: http://my.sonarqube,server:9000"
+        default: "$SONAR_SERVER_URL"
+      sonar_token:
+        description: "Authentication key (sonar.login paramter) to access SonarQube and perform analysis"
+        type: string
+        default: "$SONAR_TOKEN"
+      sonar_project_key:
+        description: "Project key"
+        type: string
+        default: "$SONAR_PROJECT_KEY"
+      sonar_sources:
+        description: "Where the files are located?"
+        type: string
+        default: "./src"
+
+      environment:
+        CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+        CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+
+      docker:
+        - image: hozanaci/backend:latest
+          auth:
+            username: hozanaci
+            password: $DOCKERHUB_PASSWORD
+          environment:
+            HOZANA_DB_URL: mysql://hozana:hozana@127.0.0.7:3306/hozana
+            HOZANA_CRM_DB_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_crm
+            HOZANA_DB_E2E_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_e2e
+            HOZANA_ELASTICSEARCH_HOST: 127.0.0.1
+            HOZANA_REDIS_URI: redis://127.0.0.1?persistent=1
+            APP_ENV: ci
+            DUMP_MAILS: false
+            XDEBUG_MODE: coverage
+        - image: mysql:8.0
+          command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
+          environment:
+            MYSQL_HOST: 127.0.0.1
+            MYSQL_USER: hozana
+            MYSQL_PASSWORD: hozana
+            MYSQL_ALLOW_EMPTY_PASSWORD: true
+            MYSQL_DATABASE: hozana
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_ROOT_PASSWORD: root
+          tmpfs:
+            - /var/lib/mysql
+        - image: hozanaci/elasticsearch:latest
+          environment:
+            ES_JAVA_OPTS: -Xms256m -Xmx256m
+        - image: redis:5
+
+    # This is the generic phpunit job, there is a second one configured slightly differently (phpunit_coverage).
+    # Pay attention to changes you make to common phpunit setup (phpunit_base) and in the two sections below.
+    # phpunit job executes on all branches exept master and prod. phpunit_coverage runs only on master and prod
+    # and requires a large instance in the CI.
+  phpunit:
+    <<: *phpunit_base
+    steps:
+      - checkout
+      -   run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+
+      # Restore the dependency cache
+      - restore_cache:
+          keys:
+            # This branch if available
+            - v1-dep-{{ .Branch }}-
+            # Default branch if not
+            - v1-dep-develop-
+            # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
+            - v1-dep-
+
+      # Requirements
+      - run: apt -y update
+      - run: apt install -y default-mysql-client unzip
+
+      - run: composer install
+
+      # Save dependency cache
+      - save_cache:
+          key: v1-dep-{{ .Branch }}-{{ epoch }}
+          paths:
+            - vendor
+            - ~/virtualenvs
+            - ~/.composer
+            - /tmp/phpstan/cache/
+
+      # Mails prerequisites
+      - run: .circleci/init/init-mails.sh
+
+      # MySQL configuration
+      - run: .circleci/init/init-mysql.sh
+
+      # Init Elasticsearch
+      - run: bin/console api:elasticsearch:init
+
+      # Real tests
+      - run:
+          name: Run phpuni
+          command: |
+            mkdir -p ~/phpunit
+            ./bin/phpunit -d memory_limit=2700M --log-junit /tmp/circleci-test-results/junit.xml
+          when: always
+
+      # Save test results
+      - store_test_results:
+          path: /tmp/circleci-test-results
+
+      # Save artifacts
+      - store_artifacts:
+          path: /tmp/circleci-artifacts
+      - store_artifacts:
+          path: var/log/test.log
+      - store_artifacts:
+          path: /tmp/circleci-test-results
+
+      # Check OpenApi json consistency
+      - run: bin/console nelmio:apidoc:dump --format=json > last-open-api.json
+      - run: cmp last-open-api.json open-api.json
+
+  phpunit_coverage:
+    <<: *phpunit_base
+    resource_class: large
+    steps:
+      - checkout
+      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+
+      # Restore the dependency cache
+      - restore_cache:
+          keys:
+            # This branch if available
+            - v1-dep-{{ .Branch }}-
+            # Default branch if not
+            - v1-dep-develop-
+            # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
+            - v1-dep-
+
+      # Requirements
+      - run: apt -y update
+      - run: apt install -y default-mysql-client unzip default-jdk
+
+      - run: composer install
+
+      # Save dependency cache
+      - save_cache:
+        key: v1-dep-{{ .Branch }}-{{ epoch }}
+        paths:
+          - vendor
+          - ~/virtualenvs
+          - ~/.composer
+          - /tmp/phpstan/cache/
+
+      # Mails prerequisites
+      - run: .circleci/init/init-mails.sh
+
+      # MySQL configuration
+      - run: .circleci/init/init-mysql.sh
+
+      # Init Elasticsearch
+      - run: bin/console api:elasticsearch:init
+
+      # Real tests
+      - run:
+          command: |
+            mkdir -p ~/phpunit
+            ./bin/phpunit -d memory_limit=10700M --verbose --coverage-clover /tmp/coverage-result.xml --log-junit /tmp/circleci-test-results/junit.xml
+          when: always
+
+      # feed raports to SonarQube
+      - run:
+          name: Install Sonarqube scanner
+          command: |
+                    curl -o sonar-scanner-cli-4.2.0.1873.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873.zip
+                    unzip sonar-scanner-cli-4.2.0.1873.zip
+      - run:
+          name: Run Sonarscanner
+          command: |
+                    export SONAR_SCANNER_OPTS="-Xmx2048m"
+                    eval ./sonar-scanner-4.2.0.1873/bin/sonar-scanner \
+                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                    -Dsonar.host.url="${SONAR_HOST_URL}" \
+                    -Dsonar.sources=./ \
+                    -Dsonar.exclusions=vendor/**,tests/**,**/Migrations/** \
+                    -Dsonar.token=${SONAR_TOKEN} \
+                    -Dsonar.php.tests.reportPath=/tmp/circleci-test-results/junit.xml \
+                    -Dsonar.php.coverage.reportPaths=/tmp/coverage-result.xml \
+                    -Dsonar.tests=tests
+
+      # Save test results
+      - store_test_results:
+          path: /tmp/circleci-test-results
+
+      # Save artifacts
+      - store_artifacts:
+          path: /tmp/circleci-artifacts
+      - store_artifacts:
+          path: var/log/test.log
+      - store_artifacts:
+          path: /tmp/circleci-test-results
+
   sonar-scanner:
     executor: scanner
     steps:
