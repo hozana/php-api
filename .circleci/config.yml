@@ -69,7 +69,7 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-       - run:
+      - run:
           name: Initialize git submodules
           command: git submodule update --recursive --init --remote
       - run:
