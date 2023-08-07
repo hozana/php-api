@@ -16,7 +16,17 @@ commands:
                 chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
                 git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
                 git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
-
+  clone-backend:
+    description: Clone backend as a stantalone git project
+    steps:
+        - run:
+            name: Clone backend as a standalone progect to get the right branch and history
+            command: |
+                chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
+                git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" clone git@github.com:hozana/backend.git /tmp
+                cd /tmp
+                git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" checkout ${CIRCLE_SHA1}
+                
   sonar-scanner:
     description: Check Code Quality
     parameters:
@@ -143,7 +153,10 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout-recursive
+      - clone-backend
       - run: cd backend
+      - run: ls -la .
+      - run: ls -la /tmp/backend
       - run: apt -y update
       - run: apt install -y wget
       - run: wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
