@@ -75,15 +75,15 @@ jobs:
       - run:
           name: Initialize git submodules
           # echo $DEPLOY_KEY > ~/.ssh/id_rsa_backend
+
+          # echo "Host  github.com" > ~/.ssh/config
+          #  echo "    HostName github.com" >> ~/.ssh/config
+          #  echo "    IdentityFile ~/.ssh/id_rsa_backend" >> ~/.ssh/config
+          #  cp -p deploy.key ~/.ssh/id_rsa_backend
           command: |
             mkdir -p ~/.ssh
-            echo "Host  github.com" > ~/.ssh/config
-            echo "    HostName github.com" >> ~/.ssh/config
-            echo "    IdentityFile ~/.ssh/id_rsa_backend" >> ~/.ssh/config
-            cp -p deploy.key ~/.ssh/id_rsa_backend
+            echo $DEPLOY_KEY > ~/.ssh/id_rsa_backend
             chmod 600 ~/.ssh/id_rsa_backend
-            cat ~/.ssh/id_rsa_backend
-            du -sh ~/.ssh/id_rsa_backend
             eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q ~/.ssh/id_rsa_backend 
             git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_backend" submodule sync
             git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_backend" submodule update --recursive --init --remote
