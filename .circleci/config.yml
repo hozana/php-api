@@ -140,7 +140,7 @@ jobs:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
 
     docker:
-      - image: hozanaci/backend:latest
+      - image: hozanaci/php-api:latest
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
