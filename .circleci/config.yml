@@ -80,7 +80,8 @@ jobs:
             chmod 600 ~/.ssh/id_rsa
             cat ~/.ssh/id_rsa
             du -sh ~/.ssh/id_rsa
-            git submodule sync && git submodule update --recursive --init --remote
+            git -c "core.sshCommand=ssh -i ~/.ssh/id_rsa" submodule sync
+            git -c "core.sshCommand=ssh -i ~/.ssh/id_rsa" submodule update --recursive --init --remote
       
       - run:
           name: Install dependencies
