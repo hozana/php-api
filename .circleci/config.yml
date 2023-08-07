@@ -74,16 +74,18 @@ jobs:
           command: |
             apk --update add --no-cache docker docker-cli-compose git
 
+      
+      - run:
+          name: Login to DockerHub
+          command: echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+           
       - run:
           name: Build application Docker image
-          command: |
-            echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-            docker build --no-cache -t $DOCKER_IMAGE:${CIRCLE_SHA1} .
+          command: docker build --no-cache -t $DOCKER_IMAGE:${CIRCLE_SHA1} .
 
       - run:
           name: Save image to dockerHub registry
-          command: |
-            docker push $DOCKER_IMAGE:${CIRCLE_SHA1}
+          command: docker push $DOCKER_IMAGE:${CIRCLE_SHA1}
 
   test:
     docker:
