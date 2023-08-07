@@ -152,8 +152,9 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout-recursive
-      - clone-backend
+      - run: pwd 
+      #- checkout-recursive
+      #- clone-backend
       - run: cd backend
       - run: ls -la .
       - run: ls -la /tmp/backend
