@@ -456,13 +456,12 @@ workflows:
                 - prod
                 - master
       - build
-      #- test:
-      #    requires:
-      #      - build
       - deploy:
           requires:
             - build
-           # - test
+            - linter
+            - static_analysis: 
+            #- translation_consistency
           filters:
             branches:
               only:
