@@ -1,0 +1,189 @@
+version: 2.1
+
+executors:
+  scanner:
+    docker:
+      - image: openjdk:11
+
+commands:
+  sonar-scanner:
+    description: Check Code Quality
+    parameters:
+      sonar_server_url:
+        type: string
+        description: "URL of your SonarQube server. e.g.: http://my.sonarqube,server:9000"
+        default: "$SONAR_SERVER_URL"
+      sonar_token:
+        description: "Authentication key (sonar.login paramter) to access SonarQube and perform analysis"
+        type: string
+        default: "$SONAR_TOKEN"
+      sonar_project_key:
+        description: "Project key"
+        type: string
+        default: "$SONAR_PROJECT_KEY"
+      sonar_sources:
+        description: "Where the files are located?"
+        type: string
+        default: "./src"
+
+    steps:
+        - checkout
+        - run:
+            name: Install Sonarqube scanner
+            command: |
+                wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873.zip
+                unzip sonar-scanner-cli-4.2.0.1873.zip
+        - run:
+            name: Recover coverage folder from test job
+            command: cp -rp /tmp/coverage/coverage /root/project/
+        - run:
+            name: Run Sonarscanner
+            command: |
+                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash && . /root/.nvm/nvm.sh || true
+                nvm install 18.16.0
+                export SONAR_SCANNER_OPTS="-Xmx2048m"
+                eval ./sonar-scanner-4.2.0.1873/bin/sonar-scanner \
+                -Dsonar.projectKey=<< parameters.sonar_project_key >> \
+                -Dsonar.host.url=<< parameters.sonar_server_url >> \
+                -Dsonar.sources=<< parameters.sonar_sources >> \
+                -Dsonar.token=<< parameters.sonar_token >> \
+                -Dsonar.scm.provider=git \
+                -Dsonar.skipPackageDesign=true \
+                -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
+                -Dsonar.javascript.file.suffixes=.js,.jsx \
+                -Dsonar.scm.exclusions.disabled \
+                -Dsonar.exclusions=node_modules/**,dist/**,mock/**,lambda/**,tests/**,coverage/**,config/**,src/app/\\\(routes\\\)/** \
+                -X
+
+jobs:
+  build:
+    docker:
+      - image: docker:24.0.0
+        auth:
+          username: hozanaci
+          password: $DOCKERHUB_PASSWORD
+    environment: 
+      DOCKER_IMAGE: hozanaci/php-api
+      DOCKERHUB_USERNAME: hozanaci
+    
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            apk --update add --no-cache docker docker-cli-compose git
+
+      - run:
+          name: Build application Docker image
+          command: |
+            echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+            docker build --no-cache -t $DOCKER_IMAGE:${CIRCLE_SHA1} .
+
+      - run:
+          name: Save image to dockerHub registry
+          command: |
+            docker push $DOCKER_IMAGE:${CIRCLE_SHA1}
+
+  test:
+    docker:
+      - image: hozanaci/php-api:${CIRCLE_SHA1}
+        user: root
+        auth:
+          username: hozanaci
+          password: $DOCKERHUB_PASSWORD
+
+    environment: 
+      DOCKER_IMAGE: hozanaci/php-api:${CIRCLE_SHA1}
+      DOCKERHUB_USERNAME: hozanaci
+      NODE_ENV: development
+      JEST_JUNIT_OUTPUT_DIR: ./reports/
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: 
+          name: Install dependencies
+          command: apk --update add --no-cache docker docker-cli-compose git
+      - run:
+          name: Sync latest code to working directory
+          command: |
+            rsync -a /root/project/ /home/app
+            rsync -av /root/project/.git /home/app
+      - run:
+          name: Install JUnit coverage reporter
+          command: yarn add --dev jest-junit
+      - run:
+          name: Run tests
+          command: cd /home/app && yarn install && yarn test --reporters=default --reporters=jest-junit
+      - store_test_results:
+          path: /home/app/reports/
+      - persist_to_workspace:
+          root: /home/app
+          paths:
+            - coverage
+
+  sonar-scanner:
+    executor: scanner
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: /tmp/coverage
+      - sonar-scanner
+  
+  deploy:
+    docker:
+      - image: docker:24.0.0
+        auth:
+          username: hozanaci
+          password: $DOCKERHUB_PASSWORD
+    environment: 
+      DOCKER_IMAGE: hozanaci/php-api
+      DOCKERHUB_USERNAME: hozanaci
+    
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            apk --update add --no-cache docker docker-cli-compose git
+      - run:
+          name: Login into DockerHub
+          command: |
+            echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+      - run:
+          name: Recover release candidate
+          command: |
+            docker pull $DOCKER_IMAGE:${CIRCLE_SHA1}
+      - run:
+          name: Publish image to :latest tag
+          command: |
+            docker tag $DOCKER_IMAGE:${CIRCLE_SHA1} $DOCKER_IMAGE:${CIRCLE_BRANCH}
+            docker push $DOCKER_IMAGE:${CIRCLE_BRANCH}
+
+# Orchestrate our job run sequence
+workflows:
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - deploy:
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+
+      - sonar-scanner:
+          context: lineclass
+          requires:
+            - test
+          filters:
+            branches:
+              only: 
+                - develop
+                - master
