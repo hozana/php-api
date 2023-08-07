@@ -81,7 +81,7 @@ jobs:
           #  echo "    IdentityFile ~/.ssh/id_rsa_backend" >> ~/.ssh/config
           #  cp -p deploy.key ~/.ssh/id_rsa_backend
           command: |
-            eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
+            chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
             git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
             git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
       
