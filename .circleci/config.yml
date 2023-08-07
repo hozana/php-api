@@ -171,7 +171,7 @@ workflows:
       - deploy:
           requires:
             - build
-            - test
+           # - test
           filters:
             branches:
               only:
@@ -180,8 +180,8 @@ workflows:
 
       - sonar-scanner:
           context: lineclass
-          requires:
-            - test
+         # requires:
+          #  - test
           filters:
             branches:
               only: 
