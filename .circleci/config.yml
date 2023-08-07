@@ -74,9 +74,10 @@ jobs:
           command: apk --update add git
       - run:
           name: Initialize git submodules
+          # echo $DEPLOY_KEY > ~/.ssh/id_rsa_backend
           command: |
             mkdir -p ~/.ssh
-            echo $DEPLOY_KEY > ~/.ssh/id_rsa_backend 
+            cp -p deploy.key ~/.ssh/id_rsa_backend
             chmod 600 ~/.ssh/id_rsa_backend
             cat ~/.ssh/id_rsa_backend
             du -sh ~/.ssh/id_rsa_backend
