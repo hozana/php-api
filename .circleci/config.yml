@@ -147,18 +147,18 @@ jobs:
           APP_ENV: ci
           DUMP_MAILS: false
           XDEBUG_MODE: coverage
-      - image: mysql:8.0
-        command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
-        environment:
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_USER: hozana
-          MYSQL_PASSWORD: hozana
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: hozana
-          MYSQL_ROOT_HOST: '%'
-          MYSQL_ROOT_PASSWORD: root
-        tmpfs:
-          - /var/lib/mysql
+      -   image: mysql:8.0
+          command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
+          environment:
+              MYSQL_HOST: 127.0.0.1
+              MYSQL_USER: hozana
+              MYSQL_PASSWORD: hozana
+              MYSQL_ALLOW_EMPTY_PASSWORD: true
+              MYSQL_DATABASE: hozana
+              MYSQL_ROOT_HOST: '%'
+              MYSQL_ROOT_PASSWORD: root
+          tmpfs:
+              - /var/lib/mysql
       - image: hozanaci/elasticsearch:latest
         environment:
           ES_JAVA_OPTS: -Xms256m -Xmx256m
