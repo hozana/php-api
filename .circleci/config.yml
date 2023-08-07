@@ -147,16 +147,16 @@ jobs:
           APP_ENV: ci
           DUMP_MAILS: false
           XDEBUG_MODE: coverage
-      -   image: mysql:8.0
-          command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
-          environment:
-              MYSQL_HOST: 127.0.0.1
-              MYSQL_USER: hozana
-              MYSQL_PASSWORD: hozana
-              MYSQL_ALLOW_EMPTY_PASSWORD: true
-              MYSQL_DATABASE: hozana
-              MYSQL_ROOT_HOST: '%'
-              MYSQL_ROOT_PASSWORD: root
+      - image: mysql:8.0
+        command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USER: hozana
+          MYSQL_PASSWORD: hozana
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: hozana
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ROOT_PASSWORD: root
           #tmpfs:
           #    - /var/lib/mysql
       - image: hozanaci/elasticsearch:latest
@@ -172,7 +172,7 @@ jobs:
     <<: *phpunit_base
     steps:
       - checkout
-      -   run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
       # Restore the dependency cache
       - restore_cache:
@@ -284,21 +284,21 @@ jobs:
       - run:
           name: Install Sonarqube scanner
           command: |
-                    curl -o sonar-scanner-cli-4.2.0.1873.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873.zip
-                    unzip sonar-scanner-cli-4.2.0.1873.zip
+            curl -o sonar-scanner-cli-4.2.0.1873.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873.zip
+            unzip sonar-scanner-cli-4.2.0.1873.zip
       - run:
           name: Run Sonarscanner
           command: |
-                    export SONAR_SCANNER_OPTS="-Xmx2048m"
-                    eval ./sonar-scanner-4.2.0.1873/bin/sonar-scanner \
-                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                    -Dsonar.host.url="${SONAR_HOST_URL}" \
-                    -Dsonar.sources=./ \
-                    -Dsonar.exclusions=vendor/**,tests/**,**/Migrations/** \
-                    -Dsonar.token=${SONAR_TOKEN} \
-                    -Dsonar.php.tests.reportPath=/tmp/circleci-test-results/junit.xml \
-                    -Dsonar.php.coverage.reportPaths=/tmp/coverage-result.xml \
-                    -Dsonar.tests=tests
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            eval ./sonar-scanner-4.2.0.1873/bin/sonar-scanner \
+            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.sources=./ \
+            -Dsonar.exclusions=vendor/**,tests/**,**/Migrations/** \
+            -Dsonar.token=${SONAR_TOKEN} \
+            -Dsonar.php.tests.reportPath=/tmp/circleci-test-results/junit.xml \
+            -Dsonar.php.coverage.reportPaths=/tmp/coverage-result.xml \
+            -Dsonar.tests=tests
 
       # Save test results
       - store_test_results:
