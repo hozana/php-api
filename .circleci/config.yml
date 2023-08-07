@@ -11,7 +11,7 @@ commands:
     steps:
         - checkout
         - run:
-            name: Install Sonarqube scanner
+            name: Checkout recoursively git submodules
             command: |
                 chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
                 git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
@@ -83,7 +83,7 @@ jobs:
           name: Install dependencies
           command: |
             apk --update add --no-cache docker docker-cli-compose git
-      - checkout
+      #- checkout
       - checkout-recursive
 
       #- run:
