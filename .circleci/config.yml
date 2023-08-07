@@ -136,8 +136,8 @@ jobs:
 
    
   translation_consistency:
-    working_directory: ~/hozana/backend
-    shell: /bin/bash --login
+    #working_directory: ~/hozana/backend
+    #shell: /bin/bash --login
     parallelism: 1
     docker:
       - image: hozanaci/php-api:${CIRCLE_BRANCH}
