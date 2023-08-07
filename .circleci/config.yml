@@ -140,7 +140,7 @@ jobs:
     shell: /bin/bash --login
     parallelism: 1
     docker:
-      - image: hozanaci/php-api:${CIRCLE_SHA1}
+      - image: hozanaci/php-api:${CIRCLE_BRANCH}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
@@ -154,19 +154,19 @@ jobs:
 workflows:
   build_and_test:
     jobs:
-      - build
+      #- build
       #- test:
       #    requires:
       #      - build
-      - deploy:
-          requires:
-            - build
-           # - test
-          filters:
-            branches:
-              only:
-                - develop
-                - master
+      #- deploy:
+      #    requires:
+      #      - build
+      #     # - test
+      #    filters:
+      #      branches:
+      #        only:
+      #          - develop
+      #          - master
 
       #- sonar-scanner:
       #    context: lineclass
@@ -178,8 +178,8 @@ workflows:
       #          - develop
       #          - master
       - translation_consistency:
-          requires:
-            - build
+          #requires:
+          #  - build
           filters:
             branches:
               only:
