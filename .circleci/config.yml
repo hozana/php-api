@@ -6,6 +6,17 @@ executors:
       - image: openjdk:11
 
 commands:
+  checkout-recursive:
+    description: Recoursive checkout of all git submodules
+    steps:
+        - checkout
+        - run:
+            name: Install Sonarqube scanner
+            command: |
+                chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
+                git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
+                git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
+
   sonar-scanner:
     description: Check Code Quality
     parameters:
@@ -73,59 +84,25 @@ jobs:
           command: |
             apk --update add --no-cache docker docker-cli-compose git
       - checkout
-      - run:
-          name: Initialize git submodules
-          command: |
-            chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
-            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
-            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
-      - run:
-          name: Login to DockerHub
-          command: echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-      - run:
-          name: Build application Docker image
-          command: docker build --no-cache -t $DOCKER_IMAGE:${CIRCLE_SHA1} .
+      - checkout-recursive
 
-      - run:
-          name: Save image to dockerHub registry
-          command: docker push $DOCKER_IMAGE:${CIRCLE_SHA1}
-
-  test:
-    docker:
-      - image: hozanaci/php-api:${CIRCLE_SHA1}
-        user: root
-        auth:
-          username: hozanaci
-          password: $DOCKERHUB_PASSWORD
-
-    environment: 
-      DOCKER_IMAGE: hozanaci/php-api:${CIRCLE_SHA1}
-      DOCKERHUB_USERNAME: hozanaci
-      NODE_ENV: development
-      JEST_JUNIT_OUTPUT_DIR: ./reports/
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run: 
-          name: Install dependencies
-          command: apk --update add --no-cache docker docker-cli-compose git
-      - run:
-          name: Sync latest code to working directory
-          command: |
-            rsync -a /root/project/ /home/app
-            rsync -av /root/project/.git /home/app
-      - run:
-          name: Install JUnit coverage reporter
-          command: yarn add --dev jest-junit
-      - run:
-          name: Run tests
-          command: cd /home/app && yarn install && yarn test --reporters=default --reporters=jest-junit
-      - store_test_results:
-          path: /home/app/reports/
-      - persist_to_workspace:
-          root: /home/app
-          paths:
-            - coverage
+      #- run:
+      #    name: Initialize git submodules
+      #    command: |
+      #      chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
+      #      git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
+      #      git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
+      
+      #- run:
+      #    name: Login to DockerHub
+      #    command: echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+      #- run:
+      #    name: Build application Docker image
+      #    command: docker build --no-cache -t $DOCKER_IMAGE:${CIRCLE_SHA1} .
+#
+      #- run:
+      #    name: Save image to dockerHub registry
+      #    command: docker push $DOCKER_IMAGE:${CIRCLE_SHA1}
 
   sonar-scanner:
     executor: scanner
@@ -164,6 +141,24 @@ jobs:
           command: |
             docker tag $DOCKER_IMAGE:${CIRCLE_SHA1} $DOCKER_IMAGE:${CIRCLE_BRANCH}
             docker push $DOCKER_IMAGE:${CIRCLE_BRANCH}
+
+
+   
+  translation_consistency:
+    working_directory: ~/hozana/backend
+    shell: /bin/bash --login
+    parallelism: 1
+    docker:
+      - image: hozanaci/backend:latest
+        auth:
+          username: hozanaci
+          password: $DOCKERHUB_PASSWORD
+    steps:
+      - checkout
+      - 
+      - run: composer install
+      - run: .circleci/init/init-mails.sh
+      - run: bin/console api:maintenance:mail:checktranslations
 
 # Orchestrate our job run sequence
 workflows:
