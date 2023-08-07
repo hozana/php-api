@@ -377,7 +377,7 @@ jobs:
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
-    resource_class: medium
+    resource_class: small
     steps:
       - checkout-recursive
       - run: 
