@@ -67,14 +67,16 @@ jobs:
       DOCKERHUB_USERNAME: hozanaci
     
     steps:
-      - checkout
       - setup_remote_docker
+      - checkout
+       - run:
+          name: Initialize git submodules
+          command: git submodule update --recursive --init --remote
       - run:
           name: Install dependencies
           command: |
             apk --update add --no-cache docker docker-cli-compose git
 
-      
       - run:
           name: Login to DockerHub
           command: echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
