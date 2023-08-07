@@ -76,12 +76,12 @@ jobs:
           name: Initialize git submodules
           command: |
             mkdir -p ~/.ssh
-            echo $DEPLOY_KEY > ~/.ssh/id_rsa 
-            chmod 600 ~/.ssh/id_rsa
-            cat ~/.ssh/id_rsa
-            du -sh ~/.ssh/id_rsa
-            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" submodule sync
-            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" submodule update --recursive --init --remote
+            echo $DEPLOY_KEY > ~/.ssh/id_rsa_backend 
+            chmod 600 ~/.ssh/id_rsa_backend
+            cat ~/.ssh/id_rsa_backend
+            du -sh ~/.ssh/id_rsa_backend
+            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_backend" submodule sync
+            git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_backend" submodule update --recursive --init --remote
       
       - run:
           name: Install dependencies
