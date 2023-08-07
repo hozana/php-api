@@ -164,7 +164,7 @@ jobs:
       - run: 
           name: Run linter
           command: |
-            cd backend 
+            cd backend && ls -la 
             ./php-cs-fixer.phar -vvv --no-ansi fix --dry-run --diff
 
   static_analysis:
