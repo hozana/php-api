@@ -179,11 +179,17 @@ jobs:
             - v1-dep-develop-
             # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
             - v1-dep-
-      -   run: cd backend && composer install
+      - run: 
+          name: Run composer install (really?)
+          command: cd backend && composer install
       # phpstan
-      -   run: cd backend && php -d memory_limit=2G ./vendor/bin/phpstan analyse -c phpstan.neon
+      - run:
+          name: Run PHPStan
+          command: cd backend && php -d memory_limit=2G ./vendor/bin/phpstan analyse -c phpstan.neon
       # rector
-      -   run: cd backend && php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
+      - run:
+         name: Run rector
+         command: cd backend && php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
 
   translation_consistency:
     working_directory: /data/code
