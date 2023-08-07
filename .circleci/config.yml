@@ -133,20 +133,62 @@ jobs:
             docker tag $DOCKER_IMAGE:${CIRCLE_SHA1} $DOCKER_IMAGE:${CIRCLE_BRANCH}
             docker push $DOCKER_IMAGE:${CIRCLE_BRANCH}
 
+  linter:
+        working_directory: /data/code
+        parallelism: 1
+        docker:
+            -   image: hozanaci/php-api:${CIRCLE_BRANCH}
+                auth:
+                    username: hozanaci
+                    password: $DOCKERHUB_PASSWORD
+        steps:
+            - checkout
+            -   run: apt -y update
+            -   run: apt install -y wget
+            -   run: wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
+            -   run: chmod +x php-cs-fixer.phar
 
-   
+            # Linter
+            -   run: ./php-cs-fixer.phar -vvv --no-ansi fix --dry-run --diff
+
+    static_analysis:
+        working_directory: /data/code
+        parallelism: 1
+        docker:
+            -   image: hozanaci/php-api:${CIRCLE_BRANCH}
+                auth:
+                    username: hozanaci
+                    password: $DOCKERHUB_PASSWORD
+        steps:
+            - checkout
+
+            # Restore the dependency cache
+            -   restore_cache:
+                    keys:
+                        # This branch if available
+                        - v1-dep-{{ .Branch }}-
+                        # Default branch if not
+                        - v1-dep-develop-
+                        # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
+                        - v1-dep-
+
+            -   run: composer install
+
+            # phpstan
+            -   run: php -d memory_limit=2G ./vendor/bin/phpstan analyse -c phpstan.neon
+            # rector
+            -   run: php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
+
   translation_consistency:
-    #working_directory: ~/hozana/backend
     working_directory: /data/code
-    #shell: /bin/bash --login
     parallelism: 1
     docker:
       - image: hozanaci/php-api:${CIRCLE_BRANCH}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
+
     steps:
-      #- checkout-recursive
       - run: composer install
       - run: .circleci/init/init-mails.sh
       - run: bin/console api:maintenance:mail:checktranslations
@@ -178,6 +220,10 @@ workflows:
       #        only: 
       #          - develop
       #          - master
+      - linter:
+          requires: []
+      - static_analysis:
+          requires: []
       - translation_consistency:
           #requires:
           #  - build
