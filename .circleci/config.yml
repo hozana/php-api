@@ -71,7 +71,7 @@ jobs:
       - checkout
       - run:
           name: Install binary dependencies
-          command: apt update && apt install -y git
+          command: apk --update add git
       - run:
           name: Initialize git submodules
           command: git submodule update --recursive --init --remote
