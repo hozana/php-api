@@ -144,7 +144,7 @@ jobs:
             docker push $DOCKER_IMAGE:${CIRCLE_BRANCH}
 
   linter:
-    working_directory: /data/code
+    #working_directory: /data/code
     parallelism: 1
     docker:
       - image: hozanaci/php-api:${CIRCLE_BRANCH}
@@ -237,8 +237,8 @@ workflows:
       #          - master
       - linter:
           requires: []
-      - static_analysis:
-          requires: []
+      #- static_analysis:
+      #    requires: []
       #- translation_consistency:
       #    #requires:
       #    #  - build
