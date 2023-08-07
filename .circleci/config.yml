@@ -129,40 +129,40 @@ jobs:
         type: string
         default: "./src"
 
-      environment:
-        CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
-        CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
 
-      docker:
-        - image: hozanaci/backend:latest
-          auth:
-            username: hozanaci
-            password: $DOCKERHUB_PASSWORD
-          environment:
-            HOZANA_DB_URL: mysql://hozana:hozana@127.0.0.7:3306/hozana
-            HOZANA_CRM_DB_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_crm
-            HOZANA_DB_E2E_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_e2e
-            HOZANA_ELASTICSEARCH_HOST: 127.0.0.1
-            HOZANA_REDIS_URI: redis://127.0.0.1?persistent=1
-            APP_ENV: ci
-            DUMP_MAILS: false
-            XDEBUG_MODE: coverage
-        - image: mysql:8.0
-          command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
-          environment:
-            MYSQL_HOST: 127.0.0.1
-            MYSQL_USER: hozana
-            MYSQL_PASSWORD: hozana
-            MYSQL_ALLOW_EMPTY_PASSWORD: true
-            MYSQL_DATABASE: hozana
-            MYSQL_ROOT_HOST: '%'
-            MYSQL_ROOT_PASSWORD: root
-          tmpfs:
-            - /var/lib/mysql
-        - image: hozanaci/elasticsearch:latest
-          environment:
-            ES_JAVA_OPTS: -Xms256m -Xmx256m
-        - image: redis:5
+    docker:
+      - image: hozanaci/backend:latest
+        auth:
+          username: hozanaci
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          HOZANA_DB_URL: mysql://hozana:hozana@127.0.0.7:3306/hozana
+          HOZANA_CRM_DB_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_crm
+          HOZANA_DB_E2E_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_e2e
+          HOZANA_ELASTICSEARCH_HOST: 127.0.0.1
+          HOZANA_REDIS_URI: redis://127.0.0.1?persistent=1
+          APP_ENV: ci
+          DUMP_MAILS: false
+          XDEBUG_MODE: coverage
+      - image: mysql:8.0
+        command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USER: hozana
+          MYSQL_PASSWORD: hozana
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: hozana
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ROOT_PASSWORD: root
+        tmpfs:
+          - /var/lib/mysql
+      - image: hozanaci/elasticsearch:latest
+        environment:
+          ES_JAVA_OPTS: -Xms256m -Xmx256m
+      - image: redis:5
 
     # This is the generic phpunit job, there is a second one configured slightly differently (phpunit_coverage).
     # Pay attention to changes you make to common phpunit setup (phpunit_base) and in the two sections below.
