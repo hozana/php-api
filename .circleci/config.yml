@@ -178,12 +178,12 @@ workflows:
                 - develop
                 - master
 
-      - sonar-scanner:
-          context: lineclass
-         # requires:
-          #  - test
-          filters:
-            branches:
-              only: 
-                - develop
-                - master
+      #- sonar-scanner:
+      #    context: lineclass
+      #    requires:
+      #      - test
+      #    filters:
+      #      branches:
+      #        only: 
+      #          - develop
+      #          - master
