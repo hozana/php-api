@@ -140,7 +140,7 @@ jobs:
     shell: /bin/bash --login
     parallelism: 1
     docker:
-      - image: hozanaci/backend:${CIRCLE_SHA1}
+      - image: hozanaci/php-api:${CIRCLE_SHA1}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
