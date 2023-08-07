@@ -3,9 +3,9 @@ version: 2.1
 executors:
   docker:
     - image: docker:24.0.0
-        auth:
-          username: hozanaci
-          password: $DOCKERHUB_PASSWORD
+      auth:
+        username: hozanaci
+        password: $DOCKERHUB_PASSWORD
   scanner:
     docker:
       - image: openjdk:11
