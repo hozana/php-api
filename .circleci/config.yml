@@ -152,7 +152,7 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout
+      #- checkout
       - checkout-recursive
       - run: 
           name: Install PHP-CS-Fixer v3.5.0
@@ -163,9 +163,7 @@ jobs:
       # Linter
       - run: 
           name: Run linter
-          command: |
-            cd backend && ls -la 
-            ./php-cs-fixer.phar -vvv --no-ansi fix --dry-run --diff
+          command: cd backend && ./php-cs-fixer.phar -vvv --no-ansi fix --dry-run --diff
 
   static_analysis:
     working_directory: /data/code
