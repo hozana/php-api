@@ -246,6 +246,7 @@ jobs:
     steps:
       - checkout-recursive
       - run: 
+          name: Move around codebase to match test environment
           command: |
             cd .. && mv backend/backend /tmp/backend && mv ../project/backend /tmp/project 
             rm -rf /root/project
@@ -435,31 +436,34 @@ workflows:
   build_and_test:
     jobs:
       - phpunit:
-          requires: []
+          requires:
+            - build
           filters:
             branches:
               ignore:
                 - prod
                 - master
       - phpunit_coverage:
+          requires:
+            - build
           filters:
             branches:
               only:
                 - prod
                 - master
-      #- build
+      - build
       #- test:
       #    requires:
       #      - build
-      #- deploy:
-      #    requires:
-      #      - build
-      #     # - test
-      #    filters:
-      #      branches:
-      #        only:
-      #          - develop
-      #          - master
+      - deploy:
+          requires:
+            - build
+           # - test
+          filters:
+            branches:
+              only:
+                - develop
+                - master
 
       #- sonar-scanner:
       #    context: lineclass
@@ -470,15 +474,17 @@ workflows:
       #        only: 
       #          - develop
       #          - master
-      #- linter:
-      #    requires: []
-      #- static_analysis:
-      #    requires: []
-      #- translation_consistency:
-      #    #requires:
-      #    #  - build
-      #    filters:
-      #      branches:
-      #        only:
-      #          - prod
-      #          - master
+      - linter:
+          requires:
+            - build
+      - static_analysis: 
+          requires:
+            - build
+      - translation_consistency:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - prod
+                - master
