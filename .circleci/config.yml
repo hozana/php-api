@@ -179,7 +179,14 @@ jobs:
   phpunit:
     <<: *phpunit_base
     steps:
-      - checkout
+      - checkout-recursive
+      - run: 
+          name: Move around codebase to match test environment
+          command: |
+            cd .. && mv backend/backend /tmp/backend && mv ../project/backend /tmp/project 
+            rm -rf /root/project
+            mv /tmp/project /root/
+            mv /tmp/backend /root/project/
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
       # Restore the dependency cache
@@ -252,8 +259,6 @@ jobs:
             rm -rf /root/project
             mv /tmp/project /root/
             mv /tmp/backend /root/project/
-      - run: ls -la /root/project
-      - run: ls -la 
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
       # Restore the dependency cache
@@ -267,8 +272,7 @@ jobs:
             - v1-dep-
 
       # Requirements
-      - run: apt -y update
-      - run: apt install -y default-mysql-client unzip default-jdk
+      - run: apt -y update && apt install -y default-mysql-client unzip default-jdk
 
       - run: composer install
 
