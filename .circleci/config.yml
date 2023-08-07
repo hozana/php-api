@@ -143,7 +143,7 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout-recursive
-      - cd backend
+      - run: cd backend
       - run: apt -y update
       - run: apt install -y wget
       - run: wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
@@ -161,7 +161,8 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout
+      - checkout-recursive
+      - run: cd backend
 
       # Restore the dependency cache
       - restore_cache:
