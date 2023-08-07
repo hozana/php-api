@@ -161,8 +161,7 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout-recursive
-      - cd backend
+      - checkout
 
       # Restore the dependency cache
       - restore_cache:
