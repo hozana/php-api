@@ -144,15 +144,12 @@ jobs:
             docker push $DOCKER_IMAGE:${CIRCLE_BRANCH}
 
   linter:
-    #working_directory: /data/code
-    parallelism: 1
     docker:
       - image: hozanaci/php-api:${CIRCLE_BRANCH}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      #- checkout
       - checkout-recursive
       - run: 
           name: Install PHP-CS-Fixer v3.5.0
@@ -166,8 +163,6 @@ jobs:
           command: cd backend && ./php-cs-fixer.phar -vvv --no-ansi fix --dry-run --diff
 
   static_analysis:
-    working_directory: /data/code
-    parallelism: 1
     docker:
       - image: hozanaci/php-api:${CIRCLE_BRANCH}
         auth:
@@ -175,8 +170,6 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout-recursive
-      - run: cd backend
-
       # Restore the dependency cache
       - restore_cache:
           keys:
@@ -186,11 +179,11 @@ jobs:
             - v1-dep-develop-
             # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
             - v1-dep-
-      -   run: composer install
+      -   run: cd backend && composer install
       # phpstan
-      -   run: php -d memory_limit=2G ./vendor/bin/phpstan analyse -c phpstan.neon
+      -   run: cd backend && php -d memory_limit=2G ./vendor/bin/phpstan analyse -c phpstan.neon
       # rector
-      -   run: php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
+      -   run: cd backend && php -d memory_limit=2G ./vendor/bin/rector process src --dry-run
 
   translation_consistency:
     working_directory: /data/code
