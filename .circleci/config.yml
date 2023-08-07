@@ -155,7 +155,7 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
-      - 
+      #- 
       - run: composer install
       - run: .circleci/init/init-mails.sh
       - run: bin/console api:maintenance:mail:checktranslations
