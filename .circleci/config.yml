@@ -137,6 +137,7 @@ jobs:
    
   translation_consistency:
     #working_directory: ~/hozana/backend
+    working_directory: /data/code
     #shell: /bin/bash --login
     parallelism: 1
     docker:
@@ -145,7 +146,7 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout-recursive
+      #- checkout-recursive
       - run: composer install
       - run: .circleci/init/init-mails.sh
       - run: bin/console api:maintenance:mail:checktranslations
