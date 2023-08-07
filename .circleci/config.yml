@@ -83,16 +83,7 @@ jobs:
           name: Install dependencies
           command: |
             apk --update add --no-cache docker docker-cli-compose git
-      #- checkout
       - checkout-recursive
-
-      #- run:
-      #    name: Initialize git submodules
-      #    command: |
-      #      chmod 600 deploy.key && eval "$(ssh-agent -s)" >> /dev/null && ssh-add -q deploy.key 
-      #      git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule sync
-      #      git -c "core.sshCommand=ssh -v -o StrictHostKeyChecking=no -i deploy.key" submodule update --recursive --init --remote
-      
       - run:
           name: Login to DockerHub
           command: echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
@@ -154,8 +145,7 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout
-      #- 
+      - checkout-recursive
       - run: composer install
       - run: .circleci/init/init-mails.sh
       - run: bin/console api:maintenance:mail:checktranslations
@@ -187,3 +177,9 @@ workflows:
       #        only: 
       #          - develop
       #          - master
+      - translation_consistency:
+          filters:
+            branches:
+              only:
+                - prod
+                - master
