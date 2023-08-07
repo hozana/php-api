@@ -74,7 +74,11 @@ jobs:
           command: apk --update add git
       - run:
           name: Initialize git submodules
-          command: git submodule update --recursive --init --remote
+          command: |
+            mkdir -p ~/.ssh
+            echo $DEPLOY_KEY > ~/.ssh/id_rsa 
+            chmod 600 ~/.ssh/id_rsa
+            git submodule sync && git submodule update --recursive --init --remote
       - run:
           name: Install dependencies
           command: |
