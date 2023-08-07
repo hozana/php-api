@@ -154,12 +154,11 @@ jobs:
     steps:
       - checkout
       - checkout-recursive
-      - run: cd backend
-      - run: apt -y update
-      - run: apt install -y wget
-      - run: wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
+      - run: cd backend && curl -o php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
+      #- run: apt -y update
+      #- run: apt install -y wget
+      #- run: wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
       - run: chmod +x php-cs-fixer.phar
-
       # Linter
       - run: ./php-cs-fixer.phar -vvv --no-ansi fix --dry-run --diff
 
