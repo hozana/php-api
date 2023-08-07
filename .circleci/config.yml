@@ -154,11 +154,7 @@ jobs:
     steps:
       - checkout
       - checkout-recursive
-      - run: pwd 
-      #- clone-backend
       - run: cd backend
-      - run: ls -la .
-      - run: ls -la /tmp/backend
       - run: apt -y update
       - run: apt install -y wget
       - run: wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
