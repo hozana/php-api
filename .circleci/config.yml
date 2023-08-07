@@ -218,7 +218,7 @@ jobs:
 
       # Real tests
       - run:
-          name: Run phpuni
+          name: Run phpunit
           command: |
             mkdir -p ~/phpunit
             ./bin/phpunit -d memory_limit=2700M --log-junit /tmp/circleci-test-results/junit.xml
@@ -244,8 +244,13 @@ jobs:
     <<: *phpunit_base
     resource_class: large
     steps:
-      - checkout
-      - run: pwd
+      - checkout-recursive
+      - run: 
+          command: |
+            cd .. && mv backend/backend /tmp/backend && mv ../project/backend /tmp/project 
+            rm -rf /root/project
+            mv /tmp/project /root/
+            mv /tmp/backend /root/project/
       - run: ls -la /root/project
       - run: ls -la 
       - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
