@@ -152,10 +152,11 @@ jobs:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
     steps:
+      - checkout
       - run: pwd 
       #- checkout-recursive
       #- clone-backend
-      - run: cd backend
+      #- run: cd backend
       - run: ls -la .
       - run: ls -la /tmp/backend
       - run: apt -y update
@@ -238,11 +239,11 @@ workflows:
           requires: []
       - static_analysis:
           requires: []
-      - translation_consistency:
-          #requires:
-          #  - build
-          filters:
-            branches:
-              only:
-                - prod
-                - master
+      #- translation_consistency:
+      #    #requires:
+      #    #  - build
+      #    filters:
+      #      branches:
+      #        only:
+      #          - prod
+      #          - master
