@@ -17,6 +17,7 @@ RUN apt-get update \
     && apt-get upgrade -y --allow-unauthenticated \
     && apt-get install -y --allow-unauthenticated \
         apt-transport-https \
+        libfcgi0ldbl \
         curl \
         git \
         libpcre3-dev \
@@ -147,3 +148,4 @@ RUN docker-php-source delete && \
 
 CMD php-fpm
 ENTRYPOINT ["/usr/local/bin/docker-php-entrypoint"]
+HEALTHCHECK --interval=15s --timeout=30s --start-period=30s --retries=10 CMD SCRIPT_FILENAME=/data/code/public/index.php REQUEST_URI= QUERY_STRING= REQUEST_METHOD=GET cgi-fcgi -bind -connect localhost:9000 || exit 1

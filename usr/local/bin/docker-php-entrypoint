@@ -1,15 +1,120 @@
 #!/bin/bash -x
 set -e
 
+#Show PHP versions
+echo "----- versions"
+version=$(php -v | grep -Eo "PHP [0-9\.]+");
+echo "PHP          --> $version"
+version=`composer --version | grep -Po '\d.\d.\d '`
+echo "Composer     --> $version"
+
+cd /data/code || exit 1
+
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
 	set -- php-fpm "$@"
 fi
 
-composer install
 mkdir -p /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
-bin/console doctrine:database:create --if-not-exists
-#yarn && yarn build
+
+mkdir -p /root/.ssh && echo "-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
+NhAAAAAwEAAQAAAQEAxJKyt0wtV763BCbI+lQ3EjQJ71E6mi8RAVb/MGe9c7Daso4UO0k7
+ScZDuTBLWZiz1K/Ju1H2VmK4HkCUGr3euc6YIH25PBf8zBZ/PPX8kOD1B5rhwXlweuYkeO
+nViCRiod//Sk+Xv9xH4rwU9l/dSRC4jBM7L81WkWEK8VjCV/mgKSpt7pBM78pas+4XOFLb
+4NgXqBvgaRA8c+6x9od1XBtN+0im/96z/3ZoO9DSPeNn9UgWsei09edWJp/Vq2cpCH6c1v
+fO5GgAX0DyI27KkGj7v7St8yExN+3A5OMZhKRgYvu7kWuPg4xgMZVVutrWF2+Ym2mJAtDc
++ouIRKlBZQAAA8jjmErh45hK4QAAAAdzc2gtcnNhAAABAQDEkrK3TC1XvrcEJsj6VDcSNA
+nvUTqaLxEBVv8wZ71zsNqyjhQ7STtJxkO5MEtZmLPUr8m7UfZWYrgeQJQavd65zpggfbk8
+F/zMFn889fyQ4PUHmuHBeXB65iR46dWIJGKh3/9KT5e/3EfivBT2X91JELiMEzsvzVaRYQ
+rxWMJX+aApKm3ukEzvylqz7hc4Utvg2BeoG+BpEDxz7rH2h3VcG037SKb/3rP/dmg70NI9
+42f1SBax6LT151Ymn9WrZykIfpzW987kaABfQPIjbsqQaPu/tK3zITE37cDk4xmEpGBi+7
+uRa4+DjGAxlVW62tYXb5ibaYkC0Nz6i4hEqUFlAAAAAwEAAQAAAQEAqXz/QRIaimxzKs4y
+Pbz9GuHpqwHzsFtiozAaqebYr/bOKmRcx112FD8xx2v/nAoRDBJhsvSRnJxTuineSUxqzP
+R3sJQWcd0Q5/uBy9Mg6N4+B0eg3YvS0vS6f9LGfTM6I+6aFL2ZzyCkjreyr1eq2cPkC0rN
+noLC4Gi24a+xKd4ZHZvFvZYjKtEz/Q0FyhzzJc+j1YVjbBKswJznZXAIVeXVqi9sXyGLMi
+Vkik3x5Voin+1Sh/5zKFlg0xjETz5FaiyugqBKimE2NKcky+zgujdr8uWYyLpqaU2OjQBB
+Y7hRp+fIrp+yEPujNVSoYL4gfnD1Qzb5n3XVclgursW/JQAAAIEArG+HI8PAvty1laZ+/l
+8MIc28NUY1Au9PtLJvdiJR1O3RVDkXfHzkhF4EGegnabORAC496qtk05ngvgYoBYyLoDQA
+YnSyY5NgpCt0Mn9NjhnJv5yPlPjR0PwxUOKzd2seY66nmUkzyQCRob+GteJUtpnWSXJBrY
+N772KbxeegrokAAACBAP7fAPoEVphIGa9OF8g9DXE7H+ajVpXjSWkjZBWRTxCd2ubMeJkX
+nyFk42xKOObHocmKlqq3yIc0urmH/vw4AELuZOCxSERWS5j4tFMjiPQbpDJiVdDqhrzSSm
+Kz2EtfRuK83esJyK1bvmSMdui6PV8DQIjzgkcrm20vxbYgqFkzAAAAgQDFcZcyJ4W+x90J
+ZxeOZcqYj0NhhT9j98HBt5nPdxYXHD9vfv7+9XkVs6W23GAU34LhJ2vT+vRxAmxhjx0O0a
+nh7WvRgbeniaP7n2ivD0HjYYcBLY8DmqPotSNSLvawPs8vMLDS42lhW3muImKmjOf1KFsP
+1hgnmBD58jmp0x/rBwAAABFyc3luY0BiYWNrZW5kcHJvZA==
+-----END OPENSSH PRIVATE KEY-----" > /root/.ssh/id_rsa_sync && chmod 600 /root/.ssh/id_rsa_sync
+
+if [ "$APP_ENV" != 'prod' ]; then
+    # fix access rights to cache:
+    # our composer installs created them with root owner, while apache runs as www
+    echo "------ Remap www-data to composer.json owner (dev for devs and www-data service for production)"
+    export REF_OWNER_FILE=/data/code/composer.lock
+    DEV_UID="$(stat -c %u $REF_OWNER_FILE)"
+    export DEV_UID
+    DEV_GID="$(stat -c %g $REF_OWNER_FILE)"
+    export DEV_GID
+    if [ "$DEV_UID" != "0" ] || [ "$DEV_GID" != "0" ]; then
+        groupmod -g "$DEV_GID" www-data || true
+        usermod -u "$DEV_UID" -g "$DEV_GID" -s /usr/sbin/nologin www-data || true
+        chown -R "$DEV_UID":"$DEV_GID" \
+            /data/code/var/log \
+            /data/code/var/cache \
+            /data/code/var/files \
+            /.composer \
+        ;
+    fi
+
+    composer install --prefer-dist --no-progress --no-interaction
+
+    echo -n "------ Waiting for db to be ready..."
+    until HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
+        echo -n .
+    	sleep 5
+    done
+    sleep 10
+    echo "\n db is UP!"
+
+    apt update && apt install -y rsync default-mysql-client pv
+
+	rsync -a --inplace -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:dump_anon.sql /data/code &
+	rsync -a --ignore-existing --inplace -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/files /data/code/var &
+	rsync -a --ignore-existing --inplace -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/mocks /data/code/var &
+
+	HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:database:create --if-not-exists
+    HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm bin/console doctrine:database:create --connection=crm --if-not-exists
+
+    #HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:schema:update --force 
+    HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm bin/console doctrine:schema:update --force --em=crm	
+
+    #bin/console dbal:mark-all-migrations-as-executed
+    #bin/console admin:create:user Admin admin admin@hozana.org -l fr  2>&1 > /dev/null
+fi
+# connecting and creating db structure
+#mysql -h db -u hozana -phozana hozana_e2e < hozana_e2e.sql
+# removing tmp file
+#rm ./hozana_e2e.sql
+
+#else
+if [ "$APP_ENV" = 'prod' ]; then
+echo "----- migrate database"
+    ./bin/console doctrine:migrations:migrate latest -v --no-interaction
+    ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
+fi
+
+yarn install && yarn build
+bin/console asset:install
+
+if [ "$APP_ENV" != 'prod' ]; then
+    echo "
+    You may now connect to http://admin.hozana.local:1819/login with :
+        username: admin@hozana.org
+        password: admin
+    "
+fi
+
+composer install
+yarn && yarn build
 chown -R www-data:www-data /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
 
 exec "$@"
