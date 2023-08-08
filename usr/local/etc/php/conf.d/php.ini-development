@@ -1961,3 +1961,7 @@ ldap.max_links = -1
 
 ; List of headers files to preload, wildcard patterns allowed.
 ;ffi.preload=
+
+date.timezone = "Europe/Paris"
+memory_limit = -1
+upload_max_filesize = 20M
