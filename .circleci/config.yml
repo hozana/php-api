@@ -140,7 +140,7 @@ jobs:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
 
     docker:
-      - image: hozanaci/php-api:${CIRCLE_BRANCH}
+      - image: hozanaci/php-api:${CIRCLE_SHA1}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
@@ -373,7 +373,7 @@ jobs:
 
   linter:
     docker:
-      - image: hozanaci/php-api:${CIRCLE_BRANCH}
+      - image: hozanaci/php-api:${CIRCLE_SHA1}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
@@ -393,7 +393,7 @@ jobs:
 
   static_analysis:
     docker:
-      - image: hozanaci/php-api:${CIRCLE_BRANCH}
+      - image: hozanaci/php-api:${CIRCLE_SHA1}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
@@ -425,7 +425,7 @@ jobs:
     working_directory: /data/code
     parallelism: 1
     docker:
-      - image: hozanaci/php-api:${CIRCLE_BRANCH}
+      - image: hozanaci/php-api:${CIRCLE_SHA1}
         auth:
           username: hozanaci
           password: $DOCKERHUB_PASSWORD
@@ -459,8 +459,8 @@ workflows:
       - deploy:
           requires:
             - build
-            #- linter
-            #- static_analysis
+            - linter
+            - static_analysis
             #- translation_consistency
           filters:
             branches:
