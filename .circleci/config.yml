@@ -461,6 +461,8 @@ workflows:
             - build
             - linter
             - static_analysis
+            - phpunit_coverage
+            - phpunit
             #- translation_consistency
           filters:
             branches:
