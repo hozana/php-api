@@ -457,7 +457,7 @@ workflows:
                 - master
       - build
       - deploy:
-          #requires:
+          requires:
             - build
             #- linter
             #- static_analysis
