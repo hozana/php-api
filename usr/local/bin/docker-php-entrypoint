@@ -114,6 +114,7 @@ if [ "$APP_ENV" != 'prod' ]; then
 fi
 
 composer install
+bin/console api:elasticsearch:index:all
 yarn && yarn build
 chown -R www-data:www-data /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
 
