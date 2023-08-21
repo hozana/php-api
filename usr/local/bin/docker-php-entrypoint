@@ -108,8 +108,7 @@ if [ "$APP_ENV" != 'prod' ]; then
         HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm bin/console doctrine:schema:update --force --em=crm	
     fi
 
-    #bin/console admin:create:user Admin admin admin@hozana.org -l fr  2>&1 > /dev/null
-    bin/console admin:create:user Admin admin admin@hozana.org -l fr 
+    bin/console admin:create:user Admin admin admin@hozana.org -l fr  2>&1 > /dev/null || true
 
     bin/console dbal:mark-all-migrations-as-executed
     
@@ -146,7 +145,7 @@ if [ "$APP_ENV" != 'prod' ]; then
     echo "To run your tests you can connect to the contaienr and run:
 
     bin/phpunit -d memory_limit=3000M --verbose --debug
-    
+
     "
 fi
 
