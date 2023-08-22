@@ -129,7 +129,7 @@ yarn install && yarn build
 bin/console asset:install
 
 if [ "$APP_ENV" != 'prod' ]; then
-    bin/console api:elasticsearch:init && bin/console api:elasticsearch:index:all
+    bin/console api:elasticsearch:init && bin/console api:elasticsearch:index:all &
     echo "
     You may now connect to http://admin.hozana.local/login with :
         username: admin@hozana.org
@@ -141,7 +141,7 @@ composer install
 yarn && yarn build
 chown -R www-data:www-data /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
 
-if [ "$APP_ENV" != 'prod' ]; then
+if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     echo "To run your tests you can connect to the contaienr and run:
 
     bin/phpunit -d memory_limit=3000M --verbose --debug
