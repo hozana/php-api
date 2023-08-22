@@ -16,7 +16,7 @@ if [ "${1#-}" != "$1" ]; then
 fi
 
 #init mail folders 
-mkdir -p /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
+mkdir -p /data/code/var/log /data/code/var/cache /data/code/public/build/mails
 touch /data/code/public/build/mails/base.css
 touch /data/code/public/build/mails/contact.css
 
@@ -139,7 +139,7 @@ fi
 
 composer install
 yarn && yarn build
-chown -R www-data:www-data /data/code/var/logs /data/code/var/cache /data/code/public/build/mails
+chown -R www-data:www-data /data/code/var/log /data/code/var/cache /data/code/public/build/mails
 
 if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     echo "To run your tests you can connect to the contaienr and run:
