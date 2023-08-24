@@ -19,6 +19,8 @@ RUN apt-get update \
         apt-transport-https \
         libfcgi0ldbl \
         curl \
+        pv \
+        rsync \
         git \
         libpcre3-dev \
         net-tools \
