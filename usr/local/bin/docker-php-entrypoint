@@ -82,9 +82,9 @@ if [ "$APP_ENV" != 'prod' ]; then
 
     apt update && apt install -y rsync default-mysql-client pv
 
-	rsync -a --inplace -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:dump_anon.sql /data/code &
-	rsync -a --ignore-existing --inplace -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/files /data/code/var &
-	rsync -a --ignore-existing --inplace -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/mocks /data/code/var &
+	rsync -a --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:dump_anon.sql /data/code &
+	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/files /data/code/var &
+	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/mocks /data/code/var &
 
     if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
         #bin/console doc:data:drop --if-exists --force && bin/console doc:data:create
