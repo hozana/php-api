@@ -82,7 +82,7 @@ if [ "$APP_ENV" != 'prod' ]; then
 
     apt update && apt install -y rsync default-mysql-client pv
 
-	rsync -a --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:dump_anon.sql /data/code &
+	rsync -a --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:dump_anon.sql /data/code/var/files &
 	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/files /data/code/var &
 	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/mocks /data/code/var &
 
