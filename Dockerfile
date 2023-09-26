@@ -43,6 +43,8 @@ RUN apt-get update \
         librabbitmq-dev \
         libxml2-dev libxslt-dev \
         locales \
+        vim \
+        mycli \
     && docker-php-ext-configure gd \
     && docker-php-ext-configure gmp \
     && docker-php-ext-configure intl
