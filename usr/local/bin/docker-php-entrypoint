@@ -121,8 +121,8 @@ fi
 #else
 if [ "$APP_ENV" = 'prod' ]; then
 echo "----- migrate database"
-    ./bin/console doctrine:migrations:migrate latest -v --no-interaction
-    ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
+#    ./bin/console doctrine:migrations:migrate latest -v --no-interaction
+#    ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
 fi
 
 yarn install && yarn build
