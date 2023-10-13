@@ -384,7 +384,7 @@ jobs:
           name: Install PHP-CS-Fixer v3.5.0
           command: |
             cd backend 
-            curl -o php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
+            curl -L -s -o php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar
             chmod +x php-cs-fixer.phar
       # Linter
       - run: 
