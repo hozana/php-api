@@ -138,6 +138,7 @@ jobs:
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      HONEYPOT_SECURITY_API_KEY: redacted
 
     docker:
       - image: hozanaci/php-api:${CIRCLE_SHA1}
