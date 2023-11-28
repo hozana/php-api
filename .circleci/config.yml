@@ -155,7 +155,7 @@ jobs:
           DUMP_MAILS: false
           XDEBUG_MODE: coverage
       - image: mysql:8.0
-        command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
+        command: mysqld --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION" --default-authentication-plugin=mysql_native_password
         environment:
           MYSQL_HOST: 127.0.0.1
           MYSQL_USER: hozana
