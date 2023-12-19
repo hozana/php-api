@@ -129,7 +129,7 @@ yarn install && yarn build
 bin/console asset:install
 
 if [ "$APP_ENV" != 'prod' ]; then
-    bin/console api:elasticsearch:init && bin/console api:elasticsearch:index:all &
+    bin/console api:elasticsearch:init && bin/console api:elasticsearch:index &
     echo "
     You may now connect to http://admin.hozana.local/login with :
         username: admin@hozana.org
