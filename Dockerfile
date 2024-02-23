@@ -9,7 +9,7 @@ FROM php:8.1-fpm
 LABEL org.opencontainers.image.authors="marco@hozana.org"
 
 # nvm environment variables
-ENV NODE_VERSION 16.18.0
+ENV NODE_VERSION 18.16.1
 ENV NVM_DIR /usr/local/nvm
 
 # Add necesary libraries
@@ -28,9 +28,13 @@ RUN apt-get update \
         zlib1g-dev \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
+        libjpeg62-turbo \
+        libjpeg-turbo-progs \
         libpng-dev \
         libgmp-dev \
+        libwebp-dev \
         libexif-dev \
+        libxpm-dev \
         libzip-dev \
         zip \
         unzip \
@@ -43,7 +47,9 @@ RUN apt-get update \
         librabbitmq-dev \
         libxml2-dev libxslt-dev \
         locales \
-    && docker-php-ext-configure gd \
+        vim \
+        mycli \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-configure gmp \
     && docker-php-ext-configure intl
 
