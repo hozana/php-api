@@ -49,7 +49,7 @@ RUN apt-get update \
         locales \
         vim \
         mycli \
-    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype --with-xpm \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-configure gmp \
     && docker-php-ext-configure intl
 
