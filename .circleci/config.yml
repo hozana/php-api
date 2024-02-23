@@ -165,7 +165,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
           #tmpfs:
           #    - /var/lib/mysql
-      - image: hozanaci/elasticsearch:latest
+      - image: hozanaci/elasticsearch:master
         environment:
           ES_JAVA_OPTS: -Xms256m -Xmx256m
       - image: redis:5
