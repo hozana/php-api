@@ -215,7 +215,7 @@ jobs:
             - /tmp/phpstan/cache/
 
       # Mails prerequisites
-      - run: .circleci/init/init-mails.sh
+      #- run: .circleci/init/init-mails.sh
 
       # MySQL configuration
       - run: .circleci/init/init-mysql.sh
@@ -286,7 +286,7 @@ jobs:
             - /tmp/phpstan/cache/
 
       # Mails prerequisites
-      - run: .circleci/init/init-mails.sh
+      #- run: .circleci/init/init-mails.sh
 
       # MySQL configuration
       - run: .circleci/init/init-mysql.sh
@@ -432,7 +432,7 @@ jobs:
     resource_class: small
     steps:
       - run: composer install
-      - run: .circleci/init/init-mails.sh
+      #- run: .circleci/init/init-mails.sh
       - run: bin/console api:maintenance:mail:checktranslations
 
 # Orchestrate our job run sequence
