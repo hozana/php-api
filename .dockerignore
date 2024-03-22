@@ -1,0 +1,6 @@
+# these are NOT needed to build the docker image
+backend/.dev
+backend/.git
+backend/var
+backend/vendor
+backend/node_modules
