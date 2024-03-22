@@ -146,7 +146,7 @@ jobs:
           password: $DOCKERHUB_PASSWORD
         environment:
           HOZANA_DB_URL: mysql://hozana:hozana@127.0.0.7:3306/hozana
-          HOZANA_CRM_DB_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_crm
+          HOZANA_CRM_DB_URL: mysql://root:root@127.0.0.1:3306/hozana_crm
           HOZANA_DB_E2E_URL: mysql://hozana:hozana@127.0.0.1:3306/hozana_e2e
           HOZANA_ELASTICSEARCH_HOST: 127.0.0.1
           HOZANA_REDIS_URI: redis://127.0.0.1?persistent=1
