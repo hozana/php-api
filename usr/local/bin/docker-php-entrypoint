@@ -86,6 +86,14 @@ if [ "$APP_ENV" != 'prod' ]; then
 	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/files /data/code/var &
 	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/mocks /data/code/var &
 
+    # DEV Schema environment
+    if [ "$APP_ENV" = 'dev' ]; then
+        bin/console doctrine:database:create --if-not-exists
+        bin/console doctrine:database:create --connection=crm --if-not-exists
+        bin/console doctrine:schema:create &> /dev/null || true #attendand d'avoir une migration de consolidation                
+    fi
+
+    # TEST Schema environment
     if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
         #bin/console doc:data:drop --if-exists --force && bin/console doc:data:create
         #bin/console doc:data:drop --if-exists --force --connection=crm  && bin/console doc:data:create --connection crm
