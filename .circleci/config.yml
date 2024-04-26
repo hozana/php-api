@@ -245,7 +245,7 @@ jobs:
 
       # Check OpenApi json consistency
       - run: bin/console nelmio:apidoc:dump --format=json > last-open-api.json
-      - run: cmp last-open-api.json open-api.json
+      - run: cmp last-open-api.json open-api.json || diff last-open-api.json open-api.json
 
   phpunit_coverage:
     <<: *phpunit_base
