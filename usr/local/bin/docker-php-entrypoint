@@ -84,8 +84,10 @@ if [ "$APP_ENV" != 'prod' ]; then
 
     # TEST Schema environment
     if [ "$APP_ENV" = 'dev' ] || [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
-        HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:database:drop --if-exists -e test --force
-        HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:database:drop --connection=crm --if-exists --force -e test
+        if [ "$APP_ENV" != 'dev' ]; then
+            HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:database:drop --if-exists -e test --force
+            HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:database:drop --connection=crm --if-exists --force -e test
+        fi
         HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:database:create --if-not-exists
         HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:database:create --connection=crm --if-not-exists
     fi
