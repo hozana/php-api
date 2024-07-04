@@ -82,62 +82,21 @@ if [ "$APP_ENV" != 'prod' ]; then
 
     apt update && apt install -y rsync default-mysql-client pv
 
-	rsync -a --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:dump_anon.sql /data/code &
-	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/files /data/code/var &
-	rsync -a --ignore-existing --inplace --bwlimit=1.5m -e "ssh -C -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa_sync" rsync@backendprod.hozana.io:var/mocks /data/code/var &
-
-    # DEV Schema environment
-    if [ "$APP_ENV" = 'dev' ]; then
-        bin/console doctrine:database:create --if-not-exists
-        bin/console doctrine:database:create --connection=crm --if-not-exists
-        bin/console doctrine:schema:create &> /dev/null || true #attendand d'avoir une migration de consolidation                
-    fi
-
     # TEST Schema environment
-    if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
-        #bin/console doc:data:drop --if-exists --force && bin/console doc:data:create
-        #bin/console doc:data:drop --if-exists --force --connection=crm  && bin/console doc:data:create --connection crm
-        
-        cp hozana_org.sql hozana_e2e.sql && sed -i 's/USE `hozana`;/USE `hozana_e2e`;/g' hozana_e2e.sql
-        mysql -h db -u root -psecret -e "
-        DROP DATABASE IF EXISTS hozana; CREATE DATABASE IF NOT EXISTS hozana;
-        DROP DATABASE IF EXISTS hozana_crm; CREATE DATABASE IF NOT EXISTS hozana_crm;
-        DROP DATABASE IF EXISTS hozana_e2e; CREATE DATABASE IF NOT EXISTS hozana_e2e;
-        "
-        pv -f hozana_org.sql | mysql -h db -u hozana -phozana hozana
-        pv -f hozana_e2e.sql | mysql -h db -u hozana -phozana hozana_e2e
-        pv -f hozana_crm.sql | mysql -h db -u hozana -phozana hozana_crm
-        rm hozana_e2e.sql
-
+    if [ "$APP_ENV" = 'dev' ] || [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
+        HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:database:drop --if-exists -e test --force
+        HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:database:drop --connection=crm --if-exists --force -e test
         HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:database:create --if-not-exists
         HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:database:create --connection=crm --if-not-exists
-
-        HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:schema:update --force 
-        HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:schema:update --force --em=crm	
-    else
-	    HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:database:create --if-not-exists
-        HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm bin/console doctrine:database:create --connection=crm --if-not-exists
-
-        #HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:schema:update --force 
-        HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm bin/console doctrine:schema:update --force --em=crm	
     fi
 
     bin/console admin:create:user Admin admin admin@hozana.org -l fr  2>&1 > /dev/null || true
-
-    bin/console dbal:mark-all-migrations-as-executed
-    
 fi
+
 # connecting and creating db structure
-#mysql -h db -u hozana -phozana hozana_e2e < hozana_e2e.sql
-# removing tmp file
-#rm ./hozana_e2e.sql
-
-#else
-if [ "$APP_ENV" = 'prod' ]; then
 echo "----- migrate database"
-#    ./bin/console doctrine:migrations:migrate latest -v --no-interaction
-#    ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
-fi
+./bin/console doctrine:migrations:migrate latest -v --no-interaction
+./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
 
 yarn install && yarn build
 bin/console asset:install
