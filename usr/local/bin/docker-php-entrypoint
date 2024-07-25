@@ -68,7 +68,8 @@ if [ "$APP_ENV" != 'prod' ]; then
         ;
     fi
 
-    composer install --prefer-dist --no-progress --no-interaction
+    # install composer
+    /data/scripts/install_composer.sh 
 
     echo -n "------ Waiting for db to be ready..."
     until HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
@@ -93,11 +94,15 @@ fi
 
 # connecting and creating db structure
 echo "----- migrate database"
+./bin/console doctrine:cache:clear-metadata -vvv
+./bin/console doctrine:cache:clear-metadata -vvv --em=crm
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
 
-if [ "$APP_ENV" = 'dev' ]; then
+if [ "$APP_ENV" = 'test' ]; then
     echo "----- load fixtures"
+    bin/console doctrine:cache:clear-metadata -vvv
+    bin/console doctrine:cache:clear-metadata -vvv --em=crm
     bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n
     bin/console doctrine:fixtures:load --group=crm_minimal -vvv -n --em=crm
 fi
