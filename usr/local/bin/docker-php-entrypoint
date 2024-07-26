@@ -69,7 +69,7 @@ if [ "$APP_ENV" != 'prod' ]; then
     fi
 
     # install composer
-    /data/scripts/install_composer.sh 
+    /usr/local/sbin/install_composer.sh
 
     echo -n "------ Waiting for db to be ready..."
     until HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
@@ -119,7 +119,10 @@ if [ "$APP_ENV" != 'prod' ]; then
         "
 fi
 
-composer install
+# install composer
+/usr/local/sbin/install_composer.sh
+
+# build assets
 yarn && yarn build
 chown -R www-data:www-data /data/code/var/log /data/code/var/cache /data/code/public/build/mails
 
