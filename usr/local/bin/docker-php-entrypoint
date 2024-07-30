@@ -99,8 +99,9 @@ echo "----- migrate database"
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
 
-if [ "$APP_ENV" = 'test' ]; then
+if [ "$APP_ENV" != 'prod' ]; then
     echo "----- load fixtures"
+    rsync -a tests/Resources/Images/Communities/community var/files
     bin/console doctrine:cache:clear-metadata -vvv
     bin/console doctrine:cache:clear-metadata -vvv --em=crm
     bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n
