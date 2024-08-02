@@ -20,34 +20,6 @@ mkdir -p /data/code/var/log /data/code/var/cache /data/code/public/build/mails /
 touch /data/code/public/build/mails/base.css
 touch /data/code/public/build/mails/contact.css
 
-# mkdir -p /root/.ssh && echo "-----BEGIN OPENSSH PRIVATE KEY-----
-# b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
-# NhAAAAAwEAAQAAAQEAxJKyt0wtV763BCbI+lQ3EjQJ71E6mi8RAVb/MGe9c7Daso4UO0k7
-# ScZDuTBLWZiz1K/Ju1H2VmK4HkCUGr3euc6YIH25PBf8zBZ/PPX8kOD1B5rhwXlweuYkeO
-# nViCRiod//Sk+Xv9xH4rwU9l/dSRC4jBM7L81WkWEK8VjCV/mgKSpt7pBM78pas+4XOFLb
-# 4NgXqBvgaRA8c+6x9od1XBtN+0im/96z/3ZoO9DSPeNn9UgWsei09edWJp/Vq2cpCH6c1v
-# fO5GgAX0DyI27KkGj7v7St8yExN+3A5OMZhKRgYvu7kWuPg4xgMZVVutrWF2+Ym2mJAtDc
-# +ouIRKlBZQAAA8jjmErh45hK4QAAAAdzc2gtcnNhAAABAQDEkrK3TC1XvrcEJsj6VDcSNA
-# nvUTqaLxEBVv8wZ71zsNqyjhQ7STtJxkO5MEtZmLPUr8m7UfZWYrgeQJQavd65zpggfbk8
-# F/zMFn889fyQ4PUHmuHBeXB65iR46dWIJGKh3/9KT5e/3EfivBT2X91JELiMEzsvzVaRYQ
-# rxWMJX+aApKm3ukEzvylqz7hc4Utvg2BeoG+BpEDxz7rH2h3VcG037SKb/3rP/dmg70NI9
-# 42f1SBax6LT151Ymn9WrZykIfpzW987kaABfQPIjbsqQaPu/tK3zITE37cDk4xmEpGBi+7
-# uRa4+DjGAxlVW62tYXb5ibaYkC0Nz6i4hEqUFlAAAAAwEAAQAAAQEAqXz/QRIaimxzKs4y
-# Pbz9GuHpqwHzsFtiozAaqebYr/bOKmRcx112FD8xx2v/nAoRDBJhsvSRnJxTuineSUxqzP
-# R3sJQWcd0Q5/uBy9Mg6N4+B0eg3YvS0vS6f9LGfTM6I+6aFL2ZzyCkjreyr1eq2cPkC0rN
-# noLC4Gi24a+xKd4ZHZvFvZYjKtEz/Q0FyhzzJc+j1YVjbBKswJznZXAIVeXVqi9sXyGLMi
-# Vkik3x5Voin+1Sh/5zKFlg0xjETz5FaiyugqBKimE2NKcky+zgujdr8uWYyLpqaU2OjQBB
-# Y7hRp+fIrp+yEPujNVSoYL4gfnD1Qzb5n3XVclgursW/JQAAAIEArG+HI8PAvty1laZ+/l
-# 8MIc28NUY1Au9PtLJvdiJR1O3RVDkXfHzkhF4EGegnabORAC496qtk05ngvgYoBYyLoDQA
-# YnSyY5NgpCt0Mn9NjhnJv5yPlPjR0PwxUOKzd2seY66nmUkzyQCRob+GteJUtpnWSXJBrY
-# N772KbxeegrokAAACBAP7fAPoEVphIGa9OF8g9DXE7H+ajVpXjSWkjZBWRTxCd2ubMeJkX
-# nyFk42xKOObHocmKlqq3yIc0urmH/vw4AELuZOCxSERWS5j4tFMjiPQbpDJiVdDqhrzSSm
-# Kz2EtfRuK83esJyK1bvmSMdui6PV8DQIjzgkcrm20vxbYgqFkzAAAAgQDFcZcyJ4W+x90J
-# ZxeOZcqYj0NhhT9j98HBt5nPdxYXHD9vfv7+9XkVs6W23GAU34LhJ2vT+vRxAmxhjx0O0a
-# nh7WvRgbeniaP7n2ivD0HjYYcBLY8DmqPotSNSLvawPs8vMLDS42lhW3muImKmjOf1KFsP
-# 1hgnmBD58jmp0x/rBwAAABFyc3luY0BiYWNrZW5kcHJvZA==
-# -----END OPENSSH PRIVATE KEY-----" > /root/.ssh/id_rsa_sync && chmod 600 /root/.ssh/id_rsa_sync
-
 if [ "$APP_ENV" != 'prod' ]; then
     # fix access rights to cache:
     # our composer installs created them with root owner, while apache runs as www
@@ -70,6 +42,9 @@ if [ "$APP_ENV" != 'prod' ]; then
 
     # install composer
     /usr/local/sbin/install_composer.sh
+
+    # install dependencies
+    /usr/local/bin/composer install --prefer-dist --no-progress --no-interaction
 
     echo -n "------ Waiting for db to be ready..."
     until HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
@@ -118,9 +93,6 @@ if [ "$APP_ENV" != 'prod' ]; then
         password: admin
         "
 fi
-
-# install composer
-/usr/local/sbin/install_composer.sh
 
 # build assets
 yarn && yarn build
