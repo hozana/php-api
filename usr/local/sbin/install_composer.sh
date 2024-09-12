@@ -2,15 +2,15 @@
 
 echo 'Install and upgrade composer'
 
-UID=$(id -u)
-if [ $UID -ne 0 ]; then
+CURRENT_UID=$(id -u)
+if [ "$CURRENT_UID" -ne 0 ]; then
     echo "You must be root to run this script"
     exit 1
 fi
 
 if [ -f /usr/local/bin/composer ]; then
     echo "Composer is already installed, I will only self-update"
-else   
+else
     EXPECTED_SIGNATURE=$(curl -s -L https://composer.github.io/installer.sig)
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');")
