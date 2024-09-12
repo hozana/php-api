@@ -64,6 +64,8 @@ if [ "$APP_ENV" != 'prod' ]; then
         fi
         HOZANA_DB_URL=mysql://root:secret@db:3306/hozana_test bin/console doctrine:database:create --if-not-exists
         HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm_test bin/console doctrine:database:create --connection=crm --if-not-exists
+        HOZANA_DB_URL=mysql://root:secret@db:3306/hozana bin/console doctrine:database:create --if-not-exists
+        HOZANA_CRM_DB_URL=mysql://root:secret@db:3306/hozana_crm bin/console doctrine:database:create --connection=crm --if-not-exists
     fi
 fi
 
@@ -73,14 +75,6 @@ echo "----- migrate database"
 ./bin/console doctrine:cache:clear-metadata -vvv --em=crm
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
-
-if [ "$APP_ENV" != 'prod' ]; then
-    echo "----- load fixtures"
-    bin/console doctrine:cache:clear-metadata -vvv
-    bin/console doctrine:cache:clear-metadata -vvv --em=crm
-    bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n
-    bin/console doctrine:fixtures:load --group=crm_minimal -vvv -n --em=crm
-fi
 
 yarn install && yarn build
 bin/console asset:install
@@ -92,6 +86,14 @@ if [ "$APP_ENV" != 'prod' ]; then
         username: admin@hozana.org
         password: admin
         "
+fi
+
+if [ "$APP_ENV" != 'prod' ]; then
+    echo "----- load fixtures"
+    bin/console doctrine:cache:clear-metadata -vvv
+    bin/console doctrine:cache:clear-metadata -vvv --em=crm
+    bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n
+    bin/console doctrine:fixtures:load --group=crm_minimal -vvv -n --em=crm
 fi
 
 # build assets
