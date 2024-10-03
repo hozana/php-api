@@ -92,8 +92,8 @@ if [ "$APP_ENV" != 'prod' ]; then
     echo "----- load fixtures"
     bin/console doctrine:cache:clear-metadata -vvv
     bin/console doctrine:cache:clear-metadata -vvv --em=crm
-    bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n
     bin/console doctrine:fixtures:load --group=crm_minimal -vvv -n --em=crm
+    bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n &
 fi
 
 # build assets
