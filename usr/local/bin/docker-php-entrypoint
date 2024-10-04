@@ -54,7 +54,10 @@ if [ "$APP_ENV" != 'prod' ]; then
     sleep 10
     echo "\n db is UP!"
 
-    apt update && apt install -y rsync default-mysql-client pv
+    apt update && apt install -y rsync default-mysql-client pv wget
+
+    # install php-cs-fixer
+    wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar && chmod +x php-cs-fixer.phar
 
     # TEST Schema environment
     if [ "$APP_ENV" = 'dev' ] || [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
@@ -87,7 +90,7 @@ if [ "$APP_ENV" != 'prod' ]; then
     bin/console api:elasticsearch:init
 
     # check if we need to load fixtures for first bootstrap
-    NEED_FIXTURES=$(bin/console doctrine:query:sql 'SELECT COUNT(guide_id) FROM guides' | egrep "[0-9]+" | sed 's/[^0-9]//g')
+    NEED_FIXTURES=$(bin/console doctrine:query:sql 'SELECT COUNT(guide_id) FROM guides' | sed -n '/[0-9]/s/[^0-9]//gp')
     if [ "$NEED_FIXTURES" = '0' ]; then
         NEED_FIXTURES='true'
     fi
