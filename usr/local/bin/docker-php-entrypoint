@@ -15,7 +15,7 @@ if [ "${1#-}" != "$1" ]; then
 	set -- php-fpm "$@"
 fi
 
-#init mail folders 
+#init mail folders
 mkdir -p /data/code/var/log /data/code/var/cache /data/code/public/build/mails /data/code/.dev/mails
 touch /data/code/public/build/mails/base.css
 touch /data/code/public/build/mails/contact.css
@@ -80,20 +80,23 @@ yarn install && yarn build
 bin/console asset:install
 
 if [ "$APP_ENV" != 'prod' ]; then
-    bin/console api:elasticsearch:init && bin/console api:elasticsearch:index &
-    echo "
-    If everything went smoothly, you may now connect to http://admin.hozana.local/login with :
-        username: admin@hozana.org
-        password: admin
-        "
-fi
-
-if [ "$APP_ENV" != 'prod' ]; then
     echo "----- load fixtures"
     bin/console doctrine:cache:clear-metadata -vvv
     bin/console doctrine:cache:clear-metadata -vvv --em=crm
-    bin/console doctrine:fixtures:load --group=crm_minimal -vvv -n --em=crm
-    bin/console doctrine:fixtures:load --group=hoz_minimal -vvv -n &
+
+    bin/console api:elasticsearch:init
+
+    # check if we need to load fixtures for first bootstrap
+    NEED_FIXTURES=$(bin/console doctrine:query:sql 'SELECT COUNT(guide_id) FROM guides' | egrep "[0-9]+" | sed 's/[^0-9]//g')
+    if [ "$NEED_FIXTURES" = '0' ]; then
+        NEED_FIXTURES='true'
+    fi
+    if [ "$APP_ENV" = 'dev' ] && [ "$NEED_FIXTURES" = 'true' ]; then
+        bin/console doctrine:fixtures:load --group=crm_minimal -vv -n --em=crm --purge-with-truncate
+        bin/console doctrine:fixtures:load --group=hoz_minimal -vv -n --purge-with-truncate
+    fi
+
+    bin/console api:elasticsearch:index
 fi
 
 # build assets
@@ -106,6 +109,14 @@ if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     bin/phpunit -d memory_limit=3000M --verbose --debug
 
     "
+fi
+
+if [ "$APP_ENV" != 'prod' ]; then
+    echo "
+    If everything went smoothly, you may now connect to http://admin.hozana.local/login with :
+        username: admin@hozana.org
+        password: admin
+        "
 fi
 
 exec "$@"
