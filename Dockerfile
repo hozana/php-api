@@ -130,6 +130,8 @@ COPY ./backend /data/code
 # as we will later run it under a local user id.
 #COPY ./tools/docker/scripts/install_composer.sh /data/scripts/
 
+# Copy aliases to make life easier
+COPY ./backend/etc/bash.bashrc /etc/bash.bashrc
 
 COPY usr/local/sbin/install_composer.sh /usr/local/sbin/install_composer.sh 
 COPY usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint
