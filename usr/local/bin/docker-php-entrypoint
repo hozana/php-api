@@ -1,5 +1,11 @@
-#!/bin/bash -x
+#!/bin/bash
 set -e
+
+GREEN_BG='\033[42m'
+ORANGE_BG='\033[48;5;214m'
+RED_BG='\033[41m'
+BLINK='\033[5m'
+RESET='\033[0m'
 
 #Show PHP versions
 echo "----- versions"
@@ -52,12 +58,17 @@ if [ "$APP_ENV" != 'prod' ]; then
         sleep 5
     done
     sleep 10
-    echo "\n db is UP!"
+    echo -e "\n${GREEN_BG}                           ${RESET}"
+    echo -e "${GREEN_BG} [OK] db container is UP!  ${RESET}"
+    echo -e "${GREEN_BG}                           ${RESET}\n"
+
+    # configure a qa alias to run php-cs-fixer and other php tools inside the container
+    alias qa='cd "$HOZANA_BACKEND_ROOT_DIR" && /usr/local/bin/composer run qa'
 
     apt update && apt install -y rsync default-mysql-client pv wget
 
     # install php-cs-fixer
-    wget -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar && chmod +x php-cs-fixer.phar
+    wget -q -O php-cs-fixer.phar https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.5.0/php-cs-fixer.phar && chmod +x php-cs-fixer.phar
 
     # TEST Schema environment
     if [ "$APP_ENV" = 'dev' ] || [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ]; then
@@ -87,9 +98,29 @@ if [ "$APP_ENV" != 'prod' ]; then
     bin/console doctrine:cache:clear-metadata -vvv
     bin/console doctrine:cache:clear-metadata -vvv --em=crm
 
+    # Explain ElasticSearch failure of elastic search due to low free space
+    disk_usage=$(df -h | grep ' /$' | sed -n 's/.* \([0-9]*\)%.*/\1/p')
+    if [ "$disk_usage" -gt 94 ]; then
+        echo -e "${RED_BG}                                                                                        ${RESET}"
+        echo -e "${RED_BG} [ERROR] : ElasticSearch is in READ-ONLY MODE due to low disk space (< 5% free space).  ${RESET}"
+        echo -e "${RED_BG}           Free-up some space and try to start the PHP stack again.                     ${RESET}"
+        echo -e "${RED_BG}                                                                                        ${RESET}"
+        exit 255
+    fi
+
+    # Wait for elasticsearch before init and index.
+    echo -n "------ Waiting for elasticsearch to be ready..."
+    until bin/console api:elasticsearch:init --health-check > /dev/null 2>&1; do
+        echo -n .
+        sleep 5
+    done
+    echo -e "\n${GREEN_BG}                            ${RESET}"
+    echo -e "${GREEN_BG} [OK] Elasticsearch is UP!  ${RESET}"
+    echo -e "${GREEN_BG}                            ${RESET}\n"
+
     bin/console api:elasticsearch:init
 
-    # check if we need to load fixtures for first bootstrap
+    # check if we need to load fixtures for first bootstrap.
     NEED_FIXTURES=$(bin/console doctrine:query:sql 'SELECT COUNT(guide_id) FROM guides' | sed -n '/[0-9]/s/[^0-9]//gp')
     if [ "$NEED_FIXTURES" = '0' ]; then
         NEED_FIXTURES='true'
@@ -114,12 +145,32 @@ if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     "
 fi
 
+is_apache_up=$(curl -s -o /dev/null -w "%{http_code}" http://httpd/ || true)
 if [ "$APP_ENV" != 'prod' ]; then
-    echo "
-    If everything went smoothly, you may now connect to http://admin.hozana.local/login with :
-        username: admin@hozana.org
-        password: admin
-        "
+    if [ "$is_apache_up" -eq 301 ]; then
+    echo -e "
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+${GREEN_BG}${BLINK} [OK] You may now connect to http://admin.hozana.local/login with :                 ${RESET}
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+${GREEN_BG}${BLINK}         username: admin@hozana.org                                                 ${RESET}
+${GREEN_BG}${BLINK}         password: adminElasticsearch is UP!                                        ${RESET}
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+${GREEN_BG}${BLINK}      Do not forget to visit below https domain to accept self signed certificates: ${RESET}
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+${GREEN_BG}${BLINK}         https://admin.hozana.local                                                 ${RESET}
+${GREEN_BG}${BLINK}         https://api.hozana.local                                                   ${RESET}
+${GREEN_BG}${BLINK}         https://crm.hozana.local                                                   ${RESET}
+${GREEN_BG}${BLINK}         https://files.hozana.local                                                 ${RESET}
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+"
+    else
+    echo -e "
+${ORANGE_BG}${BLINK}                                                                           ${RESET}
+${ORANGE_BG}${BLINK} [WARNING] Without a local running web server:                             ${RESET}
+${ORANGE_BG}${BLINK}           subdomains of https://*.hozana.local/, will not be accessible.  ${RESET}
+${ORANGE_BG}${BLINK}                                                                           ${RESET}
+"
+    fi
 fi
 
 exec "$@"
