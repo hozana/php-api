@@ -90,6 +90,7 @@ echo "----- migrate database"
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction
 ./bin/console doctrine:migrations:migrate latest -v --no-interaction --em=crm
 
+# build assets
 yarn install && yarn build
 bin/console asset:install
 
@@ -133,8 +134,6 @@ if [ "$APP_ENV" != 'prod' ]; then
     bin/console api:elasticsearch:index
 fi
 
-# build assets
-yarn && yarn build
 chown -R www-data:www-data /data/code/var/log /data/code/var/cache /data/code/public/build/mails
 
 if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
