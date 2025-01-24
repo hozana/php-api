@@ -152,13 +152,14 @@ ${GREEN_BG}${BLINK}                                                             
 ${GREEN_BG}${BLINK} [OK] You may now connect to http://admin.hozana.local/login with :                 ${RESET}
 ${GREEN_BG}${BLINK}                                                                                    ${RESET}
 ${GREEN_BG}${BLINK}         username: admin@hozana.org                                                 ${RESET}
-${GREEN_BG}${BLINK}         password: adminElasticsearch is UP!                                        ${RESET}
+${GREEN_BG}${BLINK}         password: admin                                                            ${RESET}
 ${GREEN_BG}${BLINK}                                                                                    ${RESET}
 ${GREEN_BG}${BLINK}      Do not forget to visit below https domain to accept self signed certificates: ${RESET}
 ${GREEN_BG}${BLINK}                                                                                    ${RESET}
 ${GREEN_BG}${BLINK}         https://admin.hozana.local                                                 ${RESET}
 ${GREEN_BG}${BLINK}         https://api.hozana.local                                                   ${RESET}
 ${GREEN_BG}${BLINK}         https://crm.hozana.local                                                   ${RESET}
+${GREEN_BG}${BLINK}         https://docs.hozana.local                                                  ${RESET}
 ${GREEN_BG}${BLINK}         https://files.hozana.local                                                 ${RESET}
 ${GREEN_BG}${BLINK}                                                                                    ${RESET}
 "
