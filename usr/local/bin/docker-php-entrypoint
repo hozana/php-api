@@ -137,6 +137,15 @@ fi
 chown -R www-data:www-data /data/code/var/log /data/code/var/cache /data/code/public/build/mails
 
 if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
+    echo Installing git-hooks
+    for file in /data/code/git-hooks/*; do
+        if [ -f "$file" ]; then
+            ln "$file" /data/git-hooks/
+        fi
+    done
+fi
+
+if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     echo "To run your tests you can connect to the contaienr and run:
 
     bin/phpunit -d memory_limit=3000M --verbose --debug
