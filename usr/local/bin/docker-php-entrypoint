@@ -168,8 +168,12 @@ ${GREEN_BG}${BLINK}                                                             
 ${GREEN_BG}${BLINK}         https://admin.hozana.local                                                 ${RESET}
 ${GREEN_BG}${BLINK}         https://api.hozana.local                                                   ${RESET}
 ${GREEN_BG}${BLINK}         https://crm.hozana.local                                                   ${RESET}
-${GREEN_BG}${BLINK}         https://docs.hozana.local                                                  ${RESET}
+${GREEN_BG}${BLINK}         https://doc.hozana.local                                                   ${RESET}
 ${GREEN_BG}${BLINK}         https://files.hozana.local                                                 ${RESET}
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+${GREEN_BG}${BLINK}      And finally if you have started the frontend :                                ${RESET}
+${GREEN_BG}${BLINK}                                                                                    ${RESET}
+${GREEN_BG}${BLINK}         https://hozana.local                                                       ${RESET}
 ${GREEN_BG}${BLINK}                                                                                    ${RESET}
 "
     else
