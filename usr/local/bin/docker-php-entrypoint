@@ -27,6 +27,9 @@ touch /data/code/public/build/mails/base.css
 touch /data/code/public/build/mails/contact.css
 
 if [ "$APP_ENV" != 'prod' ]; then
+    # clear dev and tests logs (prod logs are ignored due to $APP_ENV := 'prod')
+    /bin/rm -f /data/code/var/log/*
+
     # fix access rights to cache:
     # our composer installs created them with root owner, while apache runs as www
     echo "------ Remap www-data to composer.json owner (dev for devs and www-data service for production)"
