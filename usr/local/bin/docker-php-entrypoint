@@ -141,9 +141,11 @@ chown -R www-data:www-data /data/code/var/log /data/code/var/cache /data/code/pu
 
 if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     echo Installing git-hooks
-    for file in /data/code/git-hooks/*; do
+    for file in $(ls /data/code/git-hooks/*); do
         if [ -f "$file" ]; then
-            ln -sf ../../../../../../../php-api/backend/git-hooks/"$file" /data/infra/.git/modules/php-api/modules/backend/hooks/
+            file=$(basename "$file")
+            mkdir -p /data/infra/.git/modules/php-api/modules/backend/hooks
+            ln -sf ../../../../../../php-api/backend/git-hooks/"$file" /data/infra/.git/modules/php-api/modules/backend/hooks/
         fi
     done
 fi
