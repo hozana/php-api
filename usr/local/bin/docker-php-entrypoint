@@ -143,7 +143,7 @@ if [ "$APP_ENV" = 'test' ] || [ "$APP_ENV" = 'ci' ] ; then
     echo Installing git-hooks
     for file in /data/code/git-hooks/*; do
         if [ -f "$file" ]; then
-            ln -sf ../../../../../../php-api/backend/git-hooks/"$file" /data/infra/.git/modules/php-api/modules/backend/hooks/
+            ln -sf ../../../../../../../php-api/backend/git-hooks/"$file" /data/infra/.git/modules/php-api/modules/backend/hooks/
         fi
     done
 fi
