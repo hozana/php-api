@@ -114,7 +114,7 @@ if [ "$APP_ENV" != 'prod' ]; then
 
     # Wait for elasticsearch before init and index.
     echo -n "------ Waiting for elasticsearch to be ready..."
-    until bin/console api:elasticsearch:init --health-check > /dev/null 2>&1; do
+    until bin/console api:elasticsearch:init --health-check --no-interaction > /dev/null 2>&1; do
         echo -n .
         sleep 5
     done
@@ -122,7 +122,7 @@ if [ "$APP_ENV" != 'prod' ]; then
     echo -e "${GREEN_BG} [OK] Elasticsearch is UP!  ${RESET}"
     echo -e "${GREEN_BG}                            ${RESET}\n"
 
-    bin/console api:elasticsearch:init
+    bin/console api:elasticsearch:init --no-interaction
 
     # check if we need to load fixtures for first bootstrap.
     NEED_FIXTURES=$(bin/console doctrine:query:sql 'SELECT COUNT(guide_id) FROM guides' | sed -n '/[0-9]/s/[^0-9]//gp')
@@ -134,7 +134,12 @@ if [ "$APP_ENV" != 'prod' ]; then
         bin/console doctrine:fixtures:load --group=hoz_minimal -vv -n --purge-with-truncate
     fi
 
-    bin/console api:elasticsearch:index
+    if { [[ "$APP_ENV" == "dev" ]] || [[ "$APP_ENV" == "ci" ]]; } && [[ "$NEED_FIXTURES" == "true" ]]; then
+        bin/console doctrine:fixtures:load --group=crm_minimal -vv -n --em=crm
+        bin/console doctrine:fixtures:load --group=hoz_minimal -vv -n
+    fi
+
+    bin/console api:elasticsearch:index --no-interaction
 fi
 
 chown -R www-data:www-data /data/code/var/log /data/code/var/cache /data/code/public/build/mails
