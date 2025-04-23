@@ -134,7 +134,7 @@ if [ "$APP_ENV" != 'prod' ]; then
         bin/console doctrine:fixtures:load --group=hoz_minimal -vv -n --purge-with-truncate
     fi
 
-    if [ "$LOAD_FIXTURES" = 'true' ]; then
+    if [ "$APP_ENV"  = 'ci' ]; then
         bin/console doctrine:fixtures:load --group=crm_minimal -vv -n --em=crm --purge-with-truncate
         bin/console doctrine:fixtures:load --group=hoz_minimal -vv -n --purge-with-truncate
     fi
